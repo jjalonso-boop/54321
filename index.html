@@ -204,7 +204,6 @@
         container.innerHTML = ''; 
         
         if (mode === 'time') {
-            // Ampliado hasta 300sg (5 minutos) con leyendas informativas claras
             var timeOpts = [
                 {v: 10, t: "10 sg"}, {v: 15, t: "15 sg"}, {v: 20, t: "20 sg"}, 
                 {v: 30, t: "30 sg"}, {v: 45, t: "45 sg"}, {v: 60, t: "60 sg"}, 
@@ -417,7 +416,6 @@
     function updateTimerText(val) { 
         var timerElement = document.getElementById('workout-timer');
         
-        // CONTROL DINÁMICO DE FUENTE ANTI-DESBORDE (Para números de 3 dígitos)
         if (val >= 100) {
             timerElement.classList.add('triple-digit');
             timerElement.innerText = val;
@@ -427,14 +425,23 @@
         }
     }
     
+    function forceQuit() { 
+        if (runtime.interval) { clearInterval(runtime.interval); }
+        goTo('modes'); 
+    }
+
     function finishWorkout() { 
         forceQuit(); 
         setTimeout(function() { alert("🎯 ¡Entrenamiento completado!"); }, 150);
     }
-    
-    function forceQuit() { 
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        goTo('modes'); 
+
+    // REGISTRO DEL SERVICE WORKER PARA PERMITIR INSTALACIÓN EN ANDROID
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./sw.js')
+                .then(function(reg) { console.log('Service Worker registrado con éxito', reg); })
+                .catch(function(err) { console.log('Error al registrar el Service Worker', err); });
+        });
     }
 </script>
 </body>
