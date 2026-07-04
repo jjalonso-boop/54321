@@ -3,13 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro v1.1.0</title>
+    <title>Gym Space Pro v1.1.1</title>
+    
+    <!-- LA LÍNEA CRUCIAL QUE FALTABA PARA PERMITIR LA INSTALACIÓN -->
+    <link rel="manifest" href="./manifest.json">
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
+
+    <script>
+        // Registrar el Service Worker al principio para que Chrome lo vea de inmediato
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(reg) { console.log('SW registrado con éxito'); })
+                    .catch(function(err) { console.log('Error SW', err); });
+            });
+        }
+    </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght=400;700&display=swap');
@@ -18,7 +32,6 @@
         body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; }
         
         .app-container { width: 100%; max-width: 390px; height: 95vh; display: flex; flex-direction: column; justify-content: space-between; transition: opacity 0.4s ease, transform 0.4s ease; }
-        .app-container.shutdown { opacity: 0; transform: scale(0.96); pointer-events: none; }
 
         header { text-align: center; margin-bottom: 5px; }
         header h1 { font-family: var(--font-display); font-size: 3.2rem; letter-spacing: 2px; }
@@ -28,14 +41,10 @@
         .screen.active { display: flex; animation: fadeIn 0.3s ease-out forwards; }
         
         .modes-container { display: flex; flex-direction: column; gap: 15px; }
-        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 30px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 35px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
         .mode-card:active { border-color: var(--accent-color); transform: scale(0.97); }
-        .mode-card h2 { font-family: var(--font-display); font-size: 2.3rem; letter-spacing: 1px; margin-bottom: 6px; }
-        .mode-card p { font-size: 0.85rem; color: #888; line-height: 1.4; }
-        
-        .mode-card.btn-exit-app { border: 1px dashed #ba1a1a; padding: 20px; }
-        .mode-card.btn-exit-app:active { border-color: #ff3333; background: #221111; transform: scale(0.97); }
-        .mode-card.btn-exit-app h2 { font-size: 1.8rem; color: #ff5555; margin-bottom: 0; }
+        .mode-card h2 { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 1px; margin-bottom: 6px; }
+        .mode-card p { font-size: 0.9rem; color: #888; line-height: 1.4; }
 
         .selectors-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
         .picker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-color); padding: 5px 25px; border-radius: 20px; height: 130px; border: 1px solid #1f1f1f; }
@@ -51,9 +60,7 @@
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
         
-        /* TAMAÑO BASE SEGURO PARA 2 DÍGITOS */
         .timer-number { font-family: var(--font-display); font-size: 15rem; font-weight: 900; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; transition: font-size 0.2s ease; }
-        /* CLASE DINÁMICA CUANDO SE CARGAN 3 DÍGITOS */
         .timer-number.triple-digit { font-size: 9.5rem; letter-spacing: -2px; }
         
         .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 15px; }
@@ -87,7 +94,6 @@
         <div class="modes-container">
             <div class="mode-card" onclick="chooseMode('time')"><h2>MODO TIEMPO</h2><p>Entrenamiento clásico por intervalos.</p></div>
             <div class="mode-card" onclick="chooseMode('reps')"><h2>MODO REPETICIONES</h2><p>Haz las repes a tope y pulsa.</p></div>
-            <div class="mode-card btn-exit-app" onclick="closeApp()"><h2>SALIR ✕</h2></div>
         </div>
     </div>
 
@@ -169,18 +175,6 @@
         if (!audioCtx) {
             try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
         }
-    }
-
-    function closeApp() {
-        sound(400, 250);
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        var container = document.getElementById('app-viewport');
-        container.classList.add('shutdown');
-        window.close();
-        setTimeout(function() {
-            container.classList.remove('shutdown');
-            goTo('modes');
-        }, 1200);
     }
 
     function goTo(screenId) {
@@ -433,15 +427,6 @@
     function finishWorkout() { 
         forceQuit(); 
         setTimeout(function() { alert("🎯 ¡Entrenamiento completado!"); }, 150);
-    }
-
-    // REGISTRO DEL SERVICE WORKER PARA PERMITIR INSTALACIÓN EN ANDROID
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('./sw.js')
-                .then(function(reg) { console.log('Service Worker registrado con éxito', reg); })
-                .catch(function(err) { console.log('Error al registrar el Service Worker', err); });
-        });
     }
 </script>
 </body>
