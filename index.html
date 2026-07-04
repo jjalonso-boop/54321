@@ -19,7 +19,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; }
         .app-container { width: 100%; max-width: 390px; height: 92vh; display: flex; flex-direction: column; justify-content: space-between; }
-        header { text-align: center; margin-bottom: 10px; }
+        header { text-align: center; margin-bottom: 5px; }
         header h1 { font-family: var(--font-display); font-size: 3.2rem; letter-spacing: 2px; }
         header p { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
         .screen { display: none; flex-direction: column; flex-grow: 1; justify-content: center; }
@@ -30,7 +30,6 @@
         .mode-card h2 { font-family: var(--font-display); font-size: 2.3rem; letter-spacing: 1px; margin-bottom: 6px; }
         .mode-card p { font-size: 0.85rem; color: #888; line-height: 1.4; }
         
-        /* Estilo específico para el botón de salir de la pantalla principal */
         .mode-card.btn-exit-app { border: 1px dashed #ba1a1a; padding: 20px; }
         .mode-card.btn-exit-app:active { border-color: #ff3333; background: #221111; transform: scale(0.97); }
         .mode-card.btn-exit-app h2 { font-size: 1.8rem; color: #ff5555; margin-bottom: 0; }
@@ -43,12 +42,16 @@
         .wheel-space { height: 40px; }
         .wheel-item { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--text-muted); font-weight: 400; scroll-snap-align: center; }
         .wheel-item.selected { color: var(--accent-color); font-weight: 700; font-size: 2.3rem; }
+        
         .workout-ui { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
-        .badge { font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; padding: 8px 24px; border-radius: 20px; margin-bottom: 10px; font-weight: bold; }
+        .badge { font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; padding: 8px 24px; border-radius: 20px; margin-bottom: 5px; font-weight: bold; }
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
-        .timer-number { font-family: var(--font-display); font-size: 12rem; line-height: 0.95; letter-spacing: -2px; }
-        .panels { display: flex; gap: 60px; margin-top: 15px; margin-bottom: 20px; }
+        
+        /* TAMAÑO MÁXIMO DE NÚMEROS REFORZADO */
+        .timer-number { font-family: var(--font-display); font-size: 18rem; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; }
+        
+        .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 15px; }
         .panel-data { font-size: 2.2rem; font-weight: bold; }
         .panel-data span { display: block; font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
         .actions { display: flex; gap: 15px; }
@@ -56,6 +59,7 @@
         .btn:active { opacity: 0.8; }
         .btn-go { background: var(--accent-color); color: #000; }
         .btn-stop { background: #222; color: #fff; }
+        
         .rocket-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(13,13,13,0.98); display: none; align-items: center; justify-content: center; z-index: 999; }
         .rocket-number { font-family: var(--font-display); font-size: 16rem; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
         @keyframes rocketPulse { 0% { opacity: 1; transform: scale(2.5); } 80% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(0.2); } }
@@ -109,22 +113,19 @@
     let mode = 'time'; let settings = { time: 45, reps: 10, rest: 15, series: 3 };
     let runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
 
+    // FUNCIÓN DE AUDIO POTENCIADA A VOLUMEN 0.8
     function sound(freq, duration) {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator(); const gain = ctx.createGain();
         osc.type = 'triangle'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.setValueAtTime(0.8, ctx.currentTime); // Volumen subido a 0.8
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(); setTimeout(() => osc.stop(), duration);
     }
 
-    // Función para gestionar el cierre seguro o desvío
     function closeApp() {
-        sound(400, 200);
-        window.close();
-        setTimeout(() => {
-            window.location.href = "about:blank";
-        }, 100);
+        sound(400, 200); window.close();
+        setTimeout(() => { window.location.href = "about:blank"; }, 100);
     }
 
     function goTo(screenId) {
@@ -133,4 +134,11 @@
         if(screenId === 'modes') { document.getElementById('main-title').innerText = "GYM SPACE PRO"; document.getElementById('sub-title').innerText = "Elige modalidad"; }
     }
 
-    function choose
+    function chooseMode(selectedMode) {
+        mode = selectedMode;
+        document.getElementById('sub-title').innerText = mode === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
+        let container = document.getElementById('selectors-render'); container.innerHTML = ''; 
+        if(mode === 'time') container.appendChild(createWheelRow('Tiempo Ejercicio (s)', 'time', [10, 15, 20, 30, 45, 60, 75, 90, 120], 45));
+        else container.appendChild(createWheelRow('Repeticiones', 'reps', [5, 8, 10, 12, 15, 20, 25, 30, 40, 50], 10));
+        container.appendChild(createWheelRow('Descanso (s)', 'rest', [5, 10, 15, 20, 25, 30, 45, 60, 90], 15));
+        container.appendChild(createWheelRow('Series Totales', 'series',
