@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym Space Pro</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700&display=swap');
 
         :root {
             --bg-color: #0d0d0d;
             --surface-color: #161616;
             --accent-color: #CCFF00; /* Verde Neón */
-            --rest-color: #0096ff;   /* Azul para descanso */
+            --rest-color: #0096ff;   
             --text-main: #ffffff;
-            --text-muted: #666666;
+            --text-muted: #444444;
             --font-display: 'Bebas Neue', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
@@ -40,7 +39,7 @@
         .app-container {
             width: 100%;
             max-width: 390px;
-            height: 85vh;
+            height: 88vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -58,7 +57,7 @@
 
         header p {
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: #666;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
@@ -106,15 +105,15 @@
 
         .mode-card p {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: #888;
             line-height: 1.4;
         }
 
-        /* Pantalla 2: Ajustes Rueda Minimalista */
+        /* DISEÑO DE RUEDAS VERTICALES (SCROLL WHEEL) */
         .selectors-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .picker-row {
@@ -122,38 +121,55 @@
             align-items: center;
             justify-content: space-between;
             background: var(--surface-color);
-            padding: 18px 20px;
-            border-radius: 14px;
+            padding: 10px 20px;
+            border-radius: 16px;
+            height: 110px; /* Altura fija para la fila */
+            border: 1px solid #1f1f1f;
         }
 
         .picker-label {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            color: #aaa;
+            color: #eee;
+            max-width: 50%;
         }
 
-        .wheel-view {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            width: 160px;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none;
-            justify-content: flex-end;
+        /* Contenedor de la rueda de scroll */
+        .wheel-container {
+            position: relative;
+            height: 90px;
+            width: 90px;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none; /* Ocultar barra en Firefox */
         }
-        .wheel-view::-webkit-scrollbar { display: none; }
+        
+        .wheel-container::-webkit-scrollbar {
+            display: none; /* Ocultar barra en Chrome/Safari */
+        }
+
+        /* Espaciadores arriba y abajo para permitir que el primer y último ítem queden en el centro */
+        .wheel-space {
+            height: 30px;
+        }
 
         .wheel-item {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.1rem;
             color: var(--text-muted);
+            font-weight: 400;
             scroll-snap-align: center;
-            cursor: pointer;
+            transition: color 0.15s, font-size 0.15s, font-weight 0.15s;
         }
 
+        /* Clase activa controlada por JS cuando se detiene el scroll */
         .wheel-item.selected {
             color: var(--accent-color);
-            font-weight: bold;
-            font-size: 1.4rem;
+            font-weight: 700;
+            font-size: 1.6rem;
         }
 
         /* Pantalla 3: Entrenamiento Activo */
@@ -199,7 +215,7 @@
         .panel-data span {
             display: block;
             font-size: 0.7rem;
-            color: var(--text-muted);
+            color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 4px;
@@ -269,6 +285,7 @@
         <p id="sub-title">Elige modalidad</p>
     </header>
 
+    <!-- PANTALLA 1: MODOS -->
     <div id="screen-modes" class="screen active">
         <div class="modes-container">
             <div class="mode-card" onclick="chooseMode('time')">
@@ -282,6 +299,7 @@
         </div>
     </div>
 
+    <!-- PANTALLA 2: CONFIGURACIÓN CON RUEDAS -->
     <div id="screen-setup" class="screen">
         <div class="selectors-list" id="selectors-render"></div>
         <div class="actions">
@@ -290,6 +308,7 @@
         </div>
     </div>
 
+    <!-- PANTALLA 3: ENTRENAMIENTO -->
     <div id="screen-train" class="screen">
         <div class="workout-ui">
             <div id="workout-badge" class="badge work">TRABAJO</div>
@@ -337,36 +356,86 @@
         document.getElementById('sub-title').innerText = mode === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
         
         let container = document.getElementById('selectors-render');
-        let html = '';
+        container.innerHTML = ''; // Limpiar
 
         if(mode === 'time') {
-            html += renderWheelRow('Tiempo Ejercicio (s)', 'time', [15, 30, 45, 60, 90], 45);
+            container.appendChild(createWheelRow('Tiempo Ejercicio (s)', 'time', [10, 15, 20, 30, 45, 60, 75, 90, 120], 45));
         } else {
-            html += renderWheelRow('Repeticiones', 'reps', [5, 10, 12, 15, 20, 25, 30], 10);
+            container.appendChild(createWheelRow('Repeticiones', 'reps', [5, 8, 10, 12, 15, 20, 25, 30, 40, 50], 10));
         }
-        html += renderWheelRow('Descanso (s)', 'rest', [10, 15, 20, 30, 45, 60], 15);
-        html += renderWheelRow('Series Totales', 'series', [1, 2, 3, 4, 5, 6], 3);
+        container.appendChild(createWheelRow('Descanso (s)', 'rest', [5, 10, 15, 20, 25, 30, 45, 60, 90], 15));
+        container.appendChild(createWheelRow('Series Totales', 'series', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3));
         
-        container.innerHTML = html;
         goTo('setup');
     }
 
-    function renderWheelRow(label, key, arrayOptions, defaultVal) {
-        let items = '';
-        arrayOptions.forEach(opt => {
-            let activeClass = opt === defaultVal ? 'selected' : '';
-            items += `<div class="wheel-item ${activeClass}" onclick="updateValue(this, '${key}', ${opt})">${opt}</div>`;
+    // CREACIÓN DINÁMICA DE LAS RUEDAS DE SCROLL
+    function createWheelRow(label, key, options, defaultVal) {
+        const row = document.createElement('div');
+        row.className = 'picker-row';
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'picker-label';
+        labelDiv.innerText = label;
+        row.appendChild(labelDiv);
+
+        const wheelContainer = document.createElement('div');
+        wheelContainer.className = 'wheel-container';
+        
+        const topSpace = document.createElement('div');
+        topSpace.className = 'wheel-space';
+        wheelContainer.appendChild(topSpace);
+
+        let defaultIndex = 0;
+        options.forEach((opt, idx) => {
+            const item = document.createElement('div');
+            item.className = 'wheel-item';
+            item.innerText = opt;
+            item.setAttribute('data-value', opt);
+            if(opt === defaultVal) defaultIndex = idx;
+            wheelContainer.appendChild(item);
         });
-        return `<div class="picker-row"><div class="picker-label">${label}</div><div class="wheel-view">${items}</div></div>`;
+
+        const bottomSpace = document.createElement('div');
+        bottomSpace.className = 'wheel-space';
+        wheelContainer.appendChild(bottomSpace);
+
+        // Lógica de detección de scroll para marcar la opción central en Verde Neón
+        function updateSelected() {
+            const containerCenter = wheelContainer.scrollTop + 45; // Centro del contenedor (90px / 2)
+            const items = wheelContainer.querySelectorAll('.wheel-item');
+            let closestItem = null;
+            let minDistance = Infinity;
+
+            items.forEach(item => {
+                const itemCenter = item.offsetTop + 15; // Centro del ítem (30px / 2)
+                const distance = Math.abs(containerCenter - itemCenter);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestItem = item;
+                }
+            });
+
+            if (closestItem) {
+                items.forEach(i => i.classList.remove('selected'));
+                closestItem.classList.add('selected');
+                settings[key] = parseInt(closestItem.getAttribute('data-value'));
+            }
+        }
+
+        wheelContainer.addEventListener('scroll', updateSelected);
+        row.appendChild(wheelContainer);
+
+        // Auto posicionar en el valor por defecto tras renderizar
+        setTimeout(() => {
+            wheelContainer.scrollTop = defaultIndex * 30;
+            updateSelected();
+        }, 50);
+
+        return row;
     }
 
-    function updateValue(element, key, val) {
-        element.parentElement.querySelectorAll('.wheel-item').forEach(i => i.classList.remove('selected'));
-        element.classList.add('selected');
-        settings[key] = val;
-    }
-
-    // ANIMACIÓN CUENTA ATRÁS DEL COHETE CON ZOOM HACIA EL CENTRO Y DESVANECIDO
+    // ANIMACIÓN CUENTA ATRÁS DEL COHETE
     function triggerRocketLaunch() {
         const overlay = document.getElementById('rocket-screen');
         const textNode = document.getElementById('rocket-text');
@@ -378,17 +447,17 @@
             if (countdown > 0) {
                 textNode.innerText = countdown;
                 textNode.className = 'rocket-number launch-animation';
-                sound(550, 120); // Sonido sutil de cuenta atrás
+                sound(550, 120);
                 
                 setTimeout(() => {
-                    textNode.className = 'rocket-number'; // Reset animación para el siguiente
+                    textNode.className = 'rocket-number';
                     countdown--;
                     setTimeout(runPulse, 50);
                 }, 950);
             } else {
                 textNode.innerText = "¡GO!";
                 textNode.className = 'rocket-number launch-animation';
-                sound(900, 500); // Sonido de salida
+                sound(900, 500);
                 setTimeout(() => {
                     overlay.style.display = 'none';
                     textNode.className = 'rocket-number';
