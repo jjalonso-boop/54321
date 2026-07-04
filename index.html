@@ -24,11 +24,17 @@
         header p { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
         .screen { display: none; flex-direction: column; flex-grow: 1; justify-content: center; }
         .screen.active { display: flex; animation: fadeIn 0.3s ease-out forwards; }
-        .modes-container { display: flex; flex-direction: column; gap: 20px; }
-        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 40px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+        .modes-container { display: flex; flex-direction: column; gap: 15px; }
+        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 30px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
         .mode-card:active { border-color: var(--accent-color); transform: scale(0.97); }
-        .mode-card h2 { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 1px; margin-bottom: 8px; }
-        .mode-card p { font-size: 0.9rem; color: #888; line-height: 1.4; }
+        .mode-card h2 { font-family: var(--font-display); font-size: 2.3rem; letter-spacing: 1px; margin-bottom: 6px; }
+        .mode-card p { font-size: 0.85rem; color: #888; line-height: 1.4; }
+        
+        /* Estilo específico para el botón de salir de la pantalla principal */
+        .mode-card.btn-exit-app { border: 1px dashed #ba1a1a; padding: 20px; }
+        .mode-card.btn-exit-app:active { border-color: #ff3333; background: #221111; transform: scale(0.97); }
+        .mode-card.btn-exit-app h2 { font-size: 1.8rem; color: #ff5555; margin-bottom: 0; }
+
         .selectors-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
         .picker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-color); padding: 5px 25px; border-radius: 20px; height: 130px; border: 1px solid #1f1f1f; }
         .picker-label { font-size: 1rem; font-weight: 700; color: #eee; max-width: 50%; line-height: 1.2; }
@@ -69,6 +75,7 @@
         <div class="modes-container">
             <div class="mode-card" onclick="chooseMode('time')"><h2>MODO TIEMPO</h2><p>Entrenamiento clásico por intervalos.</p></div>
             <div class="mode-card" onclick="chooseMode('reps')"><h2>MODO REPETICIONES</h2><p>Haz las repes a tope y pulsa.</p></div>
+            <div class="mode-card btn-exit-app" onclick="closeApp()"><h2>SALIR ✕</h2></div>
         </div>
     </div>
 
@@ -111,94 +118,19 @@
         osc.start(); setTimeout(() => osc.stop(), duration);
     }
 
+    // Función para gestionar el cierre seguro o desvío
+    function closeApp() {
+        sound(400, 200);
+        window.close();
+        setTimeout(() => {
+            window.location.href = "about:blank";
+        }, 100);
+    }
+
     function goTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(`screen-${screenId}`).classList.add('active');
         if(screenId === 'modes') { document.getElementById('main-title').innerText = "GYM SPACE PRO"; document.getElementById('sub-title').innerText = "Elige modalidad"; }
     }
 
-    function chooseMode(selectedMode) {
-        mode = selectedMode;
-        document.getElementById('sub-title').innerText = mode === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
-        let container = document.getElementById('selectors-render'); container.innerHTML = ''; 
-        if(mode === 'time') container.appendChild(createWheelRow('Tiempo Ejercicio (s)', 'time', [10, 15, 20, 30, 45, 60, 75, 90, 120], 45));
-        else container.appendChild(createWheelRow('Repeticiones', 'reps', [5, 8, 10, 12, 15, 20, 25, 30, 40, 50], 10));
-        container.appendChild(createWheelRow('Descanso (s)', 'rest', [5, 10, 15, 20, 25, 30, 45, 60, 90], 15));
-        container.appendChild(createWheelRow('Series Totales', 'series', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3));
-        goTo('setup');
-    }
-
-    function createWheelRow(label, key, options, defaultVal) {
-        const row = document.createElement('div'); row.className = 'picker-row';
-        const labelDiv = document.createElement('div'); labelDiv.className = 'picker-label'; labelDiv.innerText = label; row.appendChild(labelDiv);
-        const wheelContainer = document.createElement('div'); wheelContainer.className = 'wheel-container';
-        wheelContainer.appendChild(document.createElement('div')).className = 'wheel-space';
-        let defaultIndex = 0;
-        options.forEach((opt, idx) => {
-            const item = document.createElement('div'); item.className = 'wheel-item'; item.innerText = opt; item.setAttribute('data-value', opt);
-            if(opt === defaultVal) defaultIndex = idx; wheelContainer.appendChild(item);
-        });
-        wheelContainer.appendChild(document.createElement('div')).className = 'wheel-space';
-        function updateSelected() {
-            const containerCenter = wheelContainer.scrollTop + 60;
-            wheelContainer.querySelectorAll('.wheel-item').forEach(item => {
-                const dist = Math.abs(containerCenter - (item.offsetTop + 20));
-                if (dist < 30) { item.classList.add('selected'); settings[key] = parseInt(item.getAttribute('data-value')); }
-                else item.classList.remove('selected');
-            });
-        }
-        wheelContainer.addEventListener('scroll', updateSelected); row.appendChild(wheelContainer);
-        setTimeout(() => { wheelContainer.scrollTop = defaultIndex * 40; updateSelected(); }, 50);
-        return row;
-    }
-
-    function triggerRocketLaunch() {
-        const overlay = document.getElementById('rocket-screen'); const textNode = document.getElementById('rocket-text');
-        overlay.style.display = 'flex'; let countdown = 5;
-        function runPulse() {
-            if (countdown > 0) {
-                textNode.innerText = countdown; textNode.className = 'rocket-number launch-animation';
-                sound(600, 150); setTimeout(() => { textNode.className = 'rocket-number'; countdown--; setTimeout(runPulse, 50); }, 950);
-            } else {
-                textNode.innerText = "¡GO!"; textNode.className = 'rocket-number launch-animation';
-                sound(850, 600); setTimeout(() => { overlay.style.display = 'none'; startWorkoutEngine(); }, 1000);
-            }
-        }
-        runPulse();
-    }
-
-    function startWorkoutEngine() {
-        goTo('train'); runtime.seriesLeft = settings.series; refreshSeriesUILabel();
-        document.getElementById('main-title').innerText = mode === 'time' ? "MODO TIEMPO" : "MODO REPETICIONES";
-        document.getElementById('sub-title').innerText = "En marcha";
-        if (mode === 'time') { document.getElementById('p-reps-box').style.display = 'none'; document.getElementById('btn-done-reps').style.display = 'none'; executeTimePhase(); }
-        else { document.getElementById('p-reps-box').style.display = 'block'; document.getElementById('p-reps').innerText = settings.reps; document.getElementById('btn-done-reps').style.display = 'block'; executeRepsPhase(); }
-    }
-
-    function refreshSeriesUILabel() { document.getElementById('p-series').innerText = `${settings.series - runtime.seriesLeft + 1}/${settings.series}`; }
-    function executeTimePhase() { 
-        runtime.currentPhase = 'work'; runtime.seconds = settings.time; 
-        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!"; updateTimerText(runtime.seconds); 
-        runtime.interval = setInterval(() => { 
-            runtime.seconds--; updateTimerText(runtime.seconds); 
-            if(runtime.seconds > 0 && runtime.seconds <= 3) sound(600, 150); 
-            if(runtime.seconds <= 0) { clearInterval(runtime.interval); sound(900, 600); executeRestPhase(); } 
-        }, 1000); 
-    }
-    function executeRepsPhase() { runtime.currentPhase = 'work'; document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES"; document.getElementById('workout-timer').innerText = "GO"; }
-    function nextSegmentReps() { if(runtime.currentPhase === 'work' && mode === 'reps') { sound(900, 500); document.getElementById('btn-done-reps').style.display = 'none'; executeRestPhase(); } }
-    function executeRestPhase() { 
-        runtime.currentPhase = 'rest'; runtime.seconds = settings.rest; 
-        document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO"; updateTimerText(runtime.seconds); 
-        runtime.interval = setInterval(() => { 
-            runtime.seconds--; updateTimerText(runtime.seconds); 
-            if(runtime.seconds > 0 && runtime.seconds <= 3) sound(500, 150); 
-            if(runtime.seconds <= 0) { clearInterval(runtime.interval); sound(850, 600); runtime.seriesLeft--; if(runtime.seriesLeft > 0) { refreshSeriesUILabel(); if(mode === 'time') executeTimePhase(); else { document.getElementById('btn-done-reps').style.display = 'block'; executeRepsPhase(); } } else finishWorkout(); } 
-        }, 1000); 
-    }
-    function updateTimerText(val) { document.getElementById('workout-timer').innerText = val < 10 ? '0' + val : val; }
-    function finishWorkout() { forceQuit(); alert("🎯 ¡Entrenamiento completado!"); }
-    function forceQuit() { clearInterval(runtime.interval); goTo('modes'); }
-</script>
-</body>
-</html>
+    function choose
