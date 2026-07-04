@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym Space Pro</title>
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2259%22 font-family=%22system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-size=%2223%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.8%22 text-anchor=%22middle%22>54321</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2259%22 font-family=%22system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-size=%2223%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.8%22 text-anchor=%22middle%22>54321</text></svg>">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700&display=swap');
 
@@ -123,7 +127,7 @@
             background: var(--surface-color);
             padding: 10px 20px;
             border-radius: 16px;
-            height: 110px; /* Altura fija para la fila */
+            height: 110px;
             border: 1px solid #1f1f1f;
         }
 
@@ -134,21 +138,19 @@
             max-width: 50%;
         }
 
-        /* Contenedor de la rueda de scroll */
         .wheel-container {
             position: relative;
             height: 90px;
             width: 90px;
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
-            scrollbar-width: none; /* Ocultar barra en Firefox */
+            scrollbar-width: none;
         }
         
         .wheel-container::-webkit-scrollbar {
-            display: none; /* Ocultar barra en Chrome/Safari */
+            display: none;
         }
 
-        /* Espaciadores arriba y abajo para permitir que el primer y último ítem queden en el centro */
         .wheel-space {
             height: 30px;
         }
@@ -165,7 +167,6 @@
             transition: color 0.15s, font-size 0.15s, font-weight 0.15s;
         }
 
-        /* Clase activa controlada por JS cuando se detiene el scroll */
         .wheel-item.selected {
             color: var(--accent-color);
             font-weight: 700;
@@ -242,7 +243,7 @@
         .btn-go { background: var(--accent-color); color: #000; }
         .btn-stop { background: #222; color: #fff; }
 
-        /* ANIMACIÓN COHETE (CUENTA ATRÁS) */
+        /* ANIMACIÓN COHETE */
         .rocket-screen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -285,7 +286,6 @@
         <p id="sub-title">Elige modalidad</p>
     </header>
 
-    <!-- PANTALLA 1: MODOS -->
     <div id="screen-modes" class="screen active">
         <div class="modes-container">
             <div class="mode-card" onclick="chooseMode('time')">
@@ -299,7 +299,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA 2: CONFIGURACIÓN CON RUEDAS -->
     <div id="screen-setup" class="screen">
         <div class="selectors-list" id="selectors-render"></div>
         <div class="actions">
@@ -308,7 +307,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA 3: ENTRENAMIENTO -->
     <div id="screen-train" class="screen">
         <div class="workout-ui">
             <div id="workout-badge" class="badge work">TRABAJO</div>
@@ -345,6 +343,12 @@
         osc.start(); setTimeout(() => osc.stop(), duration);
     }
 
+    // Solución para iOS Audio Context lock
+    document.addEventListener('click', function() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+    }, { once: true });
+
     function goTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(`screen-${screenId}`).classList.add('active');
@@ -356,7 +360,7 @@
         document.getElementById('sub-title').innerText = mode === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
         
         let container = document.getElementById('selectors-render');
-        container.innerHTML = ''; // Limpiar
+        container.innerHTML = ''; 
 
         if(mode === 'time') {
             container.appendChild(createWheelRow('Tiempo Ejercicio (s)', 'time', [10, 15, 20, 30, 45, 60, 75, 90, 120], 45));
@@ -369,7 +373,6 @@
         goTo('setup');
     }
 
-    // CREACIÓN DINÁMICA DE LAS RUEDAS DE SCROLL
     function createWheelRow(label, key, options, defaultVal) {
         const row = document.createElement('div');
         row.className = 'picker-row';
@@ -400,15 +403,14 @@
         bottomSpace.className = 'wheel-space';
         wheelContainer.appendChild(bottomSpace);
 
-        // Lógica de detección de scroll para marcar la opción central en Verde Neón
         function updateSelected() {
-            const containerCenter = wheelContainer.scrollTop + 45; // Centro del contenedor (90px / 2)
+            const containerCenter = wheelContainer.scrollTop + 45; 
             const items = wheelContainer.querySelectorAll('.wheel-item');
             let closestItem = null;
             let minDistance = Infinity;
 
             items.forEach(item => {
-                const itemCenter = item.offsetTop + 15; // Centro del ítem (30px / 2)
+                const itemCenter = item.offsetTop + 15; 
                 const distance = Math.abs(containerCenter - itemCenter);
                 if (distance < minDistance) {
                     minDistance = distance;
@@ -426,7 +428,6 @@
         wheelContainer.addEventListener('scroll', updateSelected);
         row.appendChild(wheelContainer);
 
-        // Auto posicionar en el valor por defecto tras renderizar
         setTimeout(() => {
             wheelContainer.scrollTop = defaultIndex * 30;
             updateSelected();
@@ -435,7 +436,6 @@
         return row;
     }
 
-    // ANIMACIÓN CUENTA ATRÁS DEL COHETE
     function triggerRocketLaunch() {
         const overlay = document.getElementById('rocket-screen');
         const textNode = document.getElementById('rocket-text');
