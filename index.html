@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro v1.0.6</title>
+    <title>Gym Space Pro v1.0.7</title>
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="./manifest.json">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
+    <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
 
     <style>
@@ -53,14 +53,13 @@
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
         
-        /* NÚMEROS EXTRA GRANDES (+50% adicional) */
-        .timer-number { font-family: var(--font-display); font-size: 26rem; line-height: 0.8; letter-spacing: -6px; margin: 0 auto; display: inline-block; }
+        /* REGRESAMOS AL TAMAÑO IDEAL SEGURO (18rem en negrita limpia) */
+        .timer-number { font-family: var(--font-display); font-size: 18rem; font-weight: 900; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; }
         
-        .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 5px; }
-        .panel-data { font-size: 2.5rem; font-weight: bold; }
-        .panel-data span { display: block; font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+        .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 15px; }
+        .panel-data { font-size: 2.2rem; font-weight: bold; }
+        .panel-data span { display: block; font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
         
-        /* Contenedor elevado con margen inferior de seguridad para evitar solapamiento nativo de Android */
         .actions-wrapper { padding-bottom: 55px; width: 100%; }
         .actions { display: flex; gap: 15px; width: 100%; }
         
@@ -70,7 +69,8 @@
         .btn-stop { background: #222; color: #fff; }
         
         .rocket-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(13,13,13,0.98); display: none; align-items: center; justify-content: center; z-index: 999; }
-        .rocket-number { font-family: var(--font-display); font-size: 16rem; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
+        /* NÚMEROS DE CUENTA ATRÁS EN NEGRITA */
+        .rocket-number { font-family: var(--font-display); font-size: 16rem; font-weight: 900; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
         @keyframes rocketPulse { 0% { opacity: 1; transform: scale(2.5); } 80% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(0.2); } }
         .launch-animation { animation: rocketPulse 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -127,7 +127,6 @@
     var settings = { time: 45, reps: 10, rest: 15, series: 3 };
     var runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
     
-    // Un único contexto de audio persistente para evitar bloqueos del sistema
     var audioCtx = null;
 
     function sound(freq, duration) {
@@ -135,7 +134,6 @@
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            // Desbloquear el contexto si el navegador lo puso en suspensión
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
