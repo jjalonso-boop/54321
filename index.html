@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro v1.0.8</title>
+    <title>Gym Space Pro v1.0.9</title>
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -143,22 +143,27 @@
             osc.connect(gain); 
             gain.connect(audioCtx.destination);
             osc.start(); 
-            setTimeout(function() { try { osc.stop(); } catch(e){} }, duration);
+            setTimeout(function() { 
+                try { 
+                    osc.stop(); 
+                    osc.disconnect(); // Desconexión total del nodo para limpiar canal
+                } catch(e){} 
+            }, duration);
         } catch(e) { 
             console.log("Audio bloqueado"); 
         }
     }
 
-    // SONIDO ESPECIAL: Triple pitido rápido y agudo para indicar que empieza el DESCANSO
+    // TRIPLE PITIDO: Claramente distanciados (280ms) y muy agudos (850Hz) -> ¡Hacia el descanso!
     function playTripleBeepRest() {
-        sound(750, 100);
-        setTimeout(function() { sound(750, 100); }, 150);
-        setTimeout(function() { sound(750, 150); }, 300);
+        sound(850, 80);
+        setTimeout(function() { sound(850, 80); }, 280);
+        setTimeout(function() { sound(850, 120); }, 560);
     }
 
-    // SONIDO ESPECIAL: Pitido único largo y más grave para indicar que vuelves al TRABAJO
+    // BOOOP LARGO: Tono muy grave (380Hz) y prolongado -> ¡Vuelta al trabajo!
     function playLongBeepWork() {
-        sound(420, 700);
+        sound(380, 750);
     }
 
     function initAudioOnFirstTouch() {
@@ -270,7 +275,7 @@
             if (countdown > 0) {
                 textNode.innerText = countdown; 
                 textNode.className = 'rocket-number launch-animation';
-                sound(550, 180); // Cuenta atrás inicial un poco más grave y marcada
+                sound(340, 180); // Cuenta atrás inicial grave (aviso de inicio de acción)
                 setTimeout(function() { 
                     textNode.className = 'rocket-number'; 
                     countdown--; 
@@ -279,7 +284,7 @@
             } else {
                 textNode.innerText = "¡GO!"; 
                 textNode.className = 'rocket-number launch-animation';
-                playLongBeepWork(); // Pitido largo de inicio de entrenamiento
+                playLongBeepWork(); // Inicio definitivo
                 setTimeout(function() { 
                     overlay.style.display = 'none'; 
                     startWorkoutEngine(); 
@@ -324,11 +329,11 @@
         runtime.interval = setInterval(function() { 
             runtime.seconds--; 
             updateTimerText(runtime.seconds); 
-            // Cuenta atrás hacia el descanso: Pitidos cortos y más agudos (aviso de parada)
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(750, 120); }
+            // Cuenta atrás hacia el descanso: Tonos muy agudos (900Hz) alertando parada
+            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(900, 120); }
             if (runtime.seconds <= 0) { 
                 clearInterval(runtime.interval); 
-                playTripleBeepRest(); // ¡Triple pitido de descanso!
+                playTripleBeepRest(); // Triple pitido limpio
                 executeRestPhase(); 
             } 
         }, 1000); 
@@ -344,7 +349,7 @@
     
     function nextSegmentReps() { 
         if (runtime.currentPhase === 'work' && mode === 'reps') { 
-            playTripleBeepRest(); // ¡Triple pitido al darle a HECHO!
+            playTripleBeepRest(); 
             document.getElementById('btn-done-reps').style.display = 'none'; 
             executeRestPhase(); 
         } 
@@ -361,14 +366,14 @@
         runtime.interval = setInterval(function() { 
             runtime.seconds--; 
             updateTimerText(runtime.seconds); 
-            // Cuenta atrás hacia el ejercicio: Pitidos más graves (aviso de arranque)
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(450, 150); }
+            // Cuenta atrás hacia la acción: Tonos muy graves (340Hz) preparando arranque
+            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(340, 150); }
             if (runtime.seconds <= 0) { 
                 clearInterval(runtime.interval); 
                 runtime.seriesLeft--; 
                 
                 if (runtime.seriesLeft > 0) { 
-                    playLongBeepWork(); // ¡Pitido largo de vuelta al trabajo!
+                    playLongBeepWork(); // Booop grave largo
                     refreshSeriesUILabel(); 
                     if (mode === 'time') { 
                         executeTimePhase(); 
@@ -377,7 +382,7 @@
                         executeRepsPhase(); 
                     } 
                 } else { 
-                    sound(850, 1000); // Pitido final de éxito largo
+                    sound(600, 1200); // Pitido final medio neutro de éxito
                     finishWorkout(); 
                 } 
             } 
