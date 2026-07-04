@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym Space Pro</title>
     
+    <!-- Conexión con el archivo Manifest para permitir la instalación nativa en Android -->
+    <link rel="manifest" href="./manifest.json">
+
     <!-- Icono para Pantalla de Inicio (Apple y Android) con diseño compacto 54321 -->
     <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2259%22 font-family=%22system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-size=%2223%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.8%22 text-anchor=%22middle%22>54321</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2259%22 font-family=%22system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif%22 font-size=%2223%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.8%22 text-anchor=%22middle%22>54321</text></svg>">
@@ -18,7 +21,7 @@
             --accent-color: #CCFF00; /* Verde Neón */
             --rest-color: #0096ff;   
             --text-main: #ffffff;
-            --text-muted: #333333; /* Un poco más oscuro para que resalte más el seleccionado */
+            --text-muted: #333333; 
             --font-display: 'Bebas Neue', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
@@ -44,7 +47,7 @@
         .app-container {
             width: 100%;
             max-width: 390px;
-            height: 92vh; /* Aprovecha un poco más el alto de la pantalla */
+            height: 92vh; 
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -130,7 +133,7 @@
             background: var(--surface-color);
             padding: 5px 25px;
             border-radius: 20px;
-            height: 130px; /* Más alta para albergar números grandes */
+            height: 130px; 
             border: 1px solid #1f1f1f;
         }
 
@@ -144,7 +147,7 @@
 
         .wheel-container {
             position: relative;
-            height: 120px; /* Rueda ampliada */
+            height: 120px; 
             width: 100px;
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
@@ -156,11 +159,11 @@
         }
 
         .wheel-space {
-            height: 40px; /* Ajustado al nuevo tamaño de fila */
+            height: 40px; 
         }
 
         .wheel-item {
-            height: 40px; /* Cada número tiene más espacio vertical */
+            height: 40px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -171,14 +174,13 @@
             transition: color 0.1s, font-size 0.1s, font-weight 0.1s;
         }
 
-        /* NÚMERO SELECCIONADO EN LA RUEDA - ¡MÁS GRANDE! */
         .wheel-item.selected {
             color: var(--accent-color);
             font-weight: 700;
-            font-size: 2.3rem; /* Súper gigante en verde neón */
+            font-size: 2.3rem; 
         }
 
-        /* Pantalla 3: Entrenamiento Activo con números que llenan la pantalla */
+        /* Pantalla 3: Entrenamiento Activo */
         .workout-ui {
             text-align: center;
             display: flex;
@@ -201,10 +203,9 @@
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
 
-        /* EL CRONÓMETRO MONSTRUOSO */
         .timer-number {
             font-family: var(--font-display);
-            font-size: 12rem; /* Aumentado drásticamente para llenar todo el ancho */
+            font-size: 12rem; 
             line-height: 0.95;
             letter-spacing: -2px;
         }
@@ -217,7 +218,7 @@
         }
 
         .panel-data {
-            font-size: 2.2rem; /* Datos de series y repes más grandes */
+            font-size: 2.2rem; 
             font-weight: bold;
         }
 
@@ -251,7 +252,7 @@
         .btn-go { background: var(--accent-color); color: #000; }
         .btn-stop { background: #222; color: #fff; }
 
-        /* ANIMACIÓN COHETE GIGANTE */
+        /* ANIMACIÓN COHETE */
         .rocket-screen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -264,7 +265,7 @@
 
         .rocket-number {
             font-family: var(--font-display);
-            font-size: 16rem; /* Cuenta atrás ultra-gigante */
+            font-size: 16rem; 
             color: var(--accent-color);
             opacity: 0;
             transform: scale(2.5);
@@ -414,13 +415,13 @@
         wheelContainer.appendChild(bottomSpace);
 
         function updateSelected() {
-            const containerCenter = wheelContainer.scrollTop + 60; // Mitad del alto actual (120px / 2)
+            const containerCenter = wheelContainer.scrollTop + 60; 
             const items = wheelContainer.querySelectorAll('.wheel-item');
             let closestItem = null;
             let minDistance = Infinity;
 
             items.forEach(item => {
-                const itemCenter = item.offsetTop + 20; // Mitad del alto de celda (40px / 2)
+                const itemCenter = item.offsetTop + 20; 
                 const distance = Math.abs(containerCenter - itemCenter);
                 if (distance < minDistance) {
                     minDistance = distance;
