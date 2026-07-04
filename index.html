@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro v1.0.7</title>
+    <title>Gym Space Pro v1.0.8</title>
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -53,7 +53,6 @@
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
         
-        /* REGRESAMOS AL TAMAÑO IDEAL SEGURO (18rem en negrita limpia) */
         .timer-number { font-family: var(--font-display); font-size: 18rem; font-weight: 900; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; }
         
         .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 15px; }
@@ -69,7 +68,6 @@
         .btn-stop { background: #222; color: #fff; }
         
         .rocket-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(13,13,13,0.98); display: none; align-items: center; justify-content: center; z-index: 999; }
-        /* NÚMEROS DE CUENTA ATRÁS EN NEGRITA */
         .rocket-number { font-family: var(--font-display); font-size: 16rem; font-weight: 900; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
         @keyframes rocketPulse { 0% { opacity: 1; transform: scale(2.5); } 80% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(0.2); } }
         .launch-animation { animation: rocketPulse 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
@@ -147,15 +145,25 @@
             osc.start(); 
             setTimeout(function() { try { osc.stop(); } catch(e){} }, duration);
         } catch(e) { 
-            console.log("Audio bloqueado o no soportado"); 
+            console.log("Audio bloqueado"); 
         }
+    }
+
+    // SONIDO ESPECIAL: Triple pitido rápido y agudo para indicar que empieza el DESCANSO
+    function playTripleBeepRest() {
+        sound(750, 100);
+        setTimeout(function() { sound(750, 100); }, 150);
+        setTimeout(function() { sound(750, 150); }, 300);
+    }
+
+    // SONIDO ESPECIAL: Pitido único largo y más grave para indicar que vuelves al TRABAJO
+    function playLongBeepWork() {
+        sound(420, 700);
     }
 
     function initAudioOnFirstTouch() {
         if (!audioCtx) {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            } catch(e) {}
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
         }
     }
 
@@ -262,7 +270,7 @@
             if (countdown > 0) {
                 textNode.innerText = countdown; 
                 textNode.className = 'rocket-number launch-animation';
-                sound(600, 180); 
+                sound(550, 180); // Cuenta atrás inicial un poco más grave y marcada
                 setTimeout(function() { 
                     textNode.className = 'rocket-number'; 
                     countdown--; 
@@ -271,7 +279,7 @@
             } else {
                 textNode.innerText = "¡GO!"; 
                 textNode.className = 'rocket-number launch-animation';
-                sound(850, 600); 
+                playLongBeepWork(); // Pitido largo de inicio de entrenamiento
                 setTimeout(function() { 
                     overlay.style.display = 'none'; 
                     startWorkoutEngine(); 
@@ -316,10 +324,11 @@
         runtime.interval = setInterval(function() { 
             runtime.seconds--; 
             updateTimerText(runtime.seconds); 
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(600, 150); }
+            // Cuenta atrás hacia el descanso: Pitidos cortos y más agudos (aviso de parada)
+            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(750, 120); }
             if (runtime.seconds <= 0) { 
                 clearInterval(runtime.interval); 
-                sound(900, 600); 
+                playTripleBeepRest(); // ¡Triple pitido de descanso!
                 executeRestPhase(); 
             } 
         }, 1000); 
@@ -335,7 +344,7 @@
     
     function nextSegmentReps() { 
         if (runtime.currentPhase === 'work' && mode === 'reps') { 
-            sound(900, 500); 
+            playTripleBeepRest(); // ¡Triple pitido al darle a HECHO!
             document.getElementById('btn-done-reps').style.display = 'none'; 
             executeRestPhase(); 
         } 
@@ -352,13 +361,14 @@
         runtime.interval = setInterval(function() { 
             runtime.seconds--; 
             updateTimerText(runtime.seconds); 
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(500, 150); }
+            // Cuenta atrás hacia el ejercicio: Pitidos más graves (aviso de arranque)
+            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(450, 150); }
             if (runtime.seconds <= 0) { 
                 clearInterval(runtime.interval); 
-                sound(850, 600); 
                 runtime.seriesLeft--; 
                 
                 if (runtime.seriesLeft > 0) { 
+                    playLongBeepWork(); // ¡Pitido largo de vuelta al trabajo!
                     refreshSeriesUILabel(); 
                     if (mode === 'time') { 
                         executeTimePhase(); 
@@ -367,6 +377,7 @@
                         executeRepsPhase(); 
                     } 
                 } else { 
+                    sound(850, 1000); // Pitido final de éxito largo
                     finishWorkout(); 
                 } 
             } 
