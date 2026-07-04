@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Gym Space Pro</title>
+    <title>Gym Space Pro v1.0.3</title>
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -123,7 +123,7 @@
             gain.gain.setValueAtTime(0.8, ctx.currentTime);
             osc.connect(gain); gain.connect(ctx.destination);
             osc.start(); setTimeout(() => osc.stop(), duration);
-        } catch(e) { console.log("Audio bloqueado temporalmente"); }
+        } catch(e) { console.log("Audio bloqueado"); }
     }
 
     function closeApp() {
@@ -131,9 +131,7 @@
         clearInterval(runtime.interval);
         const container = document.getElementById('app-viewport');
         container.classList.add('shutdown');
-        
         window.close();
-        
         setTimeout(() => {
             container.classList.remove('shutdown');
             goTo('modes');
@@ -147,7 +145,6 @@
     }
 
     function chooseMode(selectedMode) {
-        // Ejecutar un sonido rápido inicial ayuda a desbloquear los permisos de AudioContext en el móvil
         sound(500, 50); 
         mode = selectedMode;
         document.getElementById('sub-title').innerText = mode === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
@@ -188,4 +185,57 @@
         overlay.style.display = 'flex'; let countdown = 5;
         function runPulse() {
             if (countdown > 0) {
-                textNode.innerText =
+                textNode.innerText = countdown; textNode.className = 'rocket-number launch-animation';
+                sound(600, 180); 
+                setTimeout(() => { textNode.className = 'rocket-number'; countdown--; setTimeout(runPulse, 50); }, 950);
+            } else {
+                textNode.innerText = "¡GO!"; textNode.className = 'rocket-number launch-animation';
+                sound(850, 600); 
+                setTimeout(() => { overlay.style.display = 'none'; startWorkoutEngine(); }, 1000);
+            }
+        }
+        runPulse();
+    }
+
+    // Comprobación reforzada para limpiar intervalos antiguos en caliente
+    function startWorkoutEngine() {
+        clearInterval(runtime.interval);
+        goTo('train'); runtime.seriesLeft = settings.series; refreshSeriesUILabel();
+        document.getElementById('main-title').innerText = mode === 'time' ? "MODO TIEMPO" : "MODO REPETICIONES";
+        document.getElementById('sub-title').innerText = "En marcha";
+        if (mode === 'time') { document.getElementById('p-reps-box').style.display = 'none'; document.getElementById('btn-done-reps').style.display = 'none'; executeTimePhase(); }
+        else { document.getElementById('p-reps-box').style.display = 'block'; document.getElementById('p-reps').innerText = settings.reps; document.getElementById('btn-done-reps').style.display = 'block'; executeRepsPhase(); }
+    }
+
+    function refreshSeriesUILabel() { document.getElementById('p-series').innerText = `${settings.series - runtime.seriesLeft + 1}/${settings.series}`; }
+    
+    function executeTimePhase() { 
+        clearInterval(runtime.interval);
+        runtime.currentPhase = 'work'; runtime.seconds = settings.time; 
+        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!"; updateTimerText(runtime.seconds); 
+        runtime.interval = setInterval(() => { 
+            runtime.seconds--; updateTimerText(runtime.seconds); 
+            if(runtime.seconds > 0 && runtime.seconds <= 5) sound(600, 150); 
+            if(runtime.seconds <= 0) { clearInterval(runtime.interval); sound(900, 600); executeRestPhase(); } 
+        }, 1000); 
+    }
+    
+    function executeRepsPhase() { runtime.currentPhase = 'work'; document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES"; document.getElementById('workout-timer').innerText = "GO"; }
+    function nextSegmentReps() { if(runtime.currentPhase === 'work' && mode === 'reps') { sound(900, 500); document.getElementById('btn-done-reps').style.display = 'none'; executeRestPhase(); } }
+    
+    function executeRestPhase() { 
+        clearInterval(runtime.interval);
+        runtime.currentPhase = 'rest'; runtime.seconds = settings.rest; 
+        document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO"; updateTimerText(runtime.seconds); 
+        runtime.interval = setInterval(() => { 
+            runtime.seconds--; updateTimerText(runtime.seconds); 
+            if(runtime.seconds > 0 && runtime.seconds <= 5) sound(500, 150); 
+            if(runtime.seconds <= 0) { clearInterval(runtime.interval); sound(850, 600); runtime.seriesLeft--; if(runtime.seriesLeft > 0) { refreshSeriesUILabel(); if(mode === 'time') executeTimePhase(); else { document.getElementById('btn-done-reps').style.display = 'block'; executeRepsPhase(); } } else finishWorkout(); } 
+        }, 1000); 
+    }
+    function updateTimerText(val) { document.getElementById('workout-timer').innerText = val < 10 ? '0' + val : val; }
+    function finishWorkout() { forceQuit(); alert("🎯 ¡Entrenamiento completado!"); }
+    function forceQuit() { clearInterval(runtime.interval); goTo('modes'); }
+</script>
+</body>
+</html>
