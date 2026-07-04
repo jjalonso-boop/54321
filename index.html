@@ -142,11 +142,13 @@
     let mode = 'time'; let settings = { time: 45, reps: 10, rest: 15, series: 3 };
     let runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
 
+    // FUNCIÓN DE AUDIO POTENCIADA (Más alto y onda más acústica)
     function sound(freq, duration) {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.type = 'sine'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.type = 'triangle'; // Cambiado a triángulo para que penetre más el ruido de fondo
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.4, ctx.currentTime); // Volumen subido a 0.4 de potencia
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(); setTimeout(() => osc.stop(), duration);
     }
@@ -198,10 +200,12 @@
         function runPulse() {
             if (countdown > 0) {
                 textNode.innerText = countdown; textNode.className = 'rocket-number launch-animation';
-                sound(550, 120); setTimeout(() => { textNode.className = 'rocket-number'; countdown--; setTimeout(runPulse, 50); }, 950);
+                sound(600, 150); // Beep de cuenta atrás inicial fuerte
+                setTimeout(() => { textNode.className = 'rocket-number'; countdown--; setTimeout(runPulse, 50); }, 950);
             } else {
                 textNode.innerText = "¡GO!"; textNode.className = 'rocket-number launch-animation';
-                sound(900, 500); setTimeout(() => { overlay.style.display = 'none'; startWorkoutEngine(); }, 1000);
+                sound(850, 600); // Pitidazo largo de inicio de entrenamiento
+                setTimeout(() => { overlay.style.display = 'none'; startWorkoutEngine(); }, 1000);
             }
         }
         runPulse();
@@ -214,10 +218,60 @@
     }
 
     function refreshSeriesUILabel() { document.getElementById('p-series').innerText = `${settings.series - runtime.seriesLeft + 1}/${settings.series}`; }
-    function executeTimePhase() { runtime.currentPhase = 'work'; runtime.seconds = settings.time; document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!"; updateTimerText(runtime.seconds); runtime.interval = setInterval(() => { runtime.seconds--; updateTimerText(runtime.seconds); if(runtime.seconds <= 0) { clearInterval(runtime.interval); sound(700, 300); executeRestPhase(); } }, 1000); }
+    
+    function executeTimePhase() { 
+        runtime.currentPhase = 'work'; runtime.seconds = settings.time; 
+        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!"; 
+        updateTimerText(runtime.seconds); 
+        
+        runtime.interval = setInterval(() => { 
+            runtime.seconds--; 
+            updateTimerText(runtime.seconds); 
+            
+            // TRIPLE BEEP: Suena en los segundos 3, 2 y 1 antes de acabar
+            if(runtime.seconds > 0 && runtime.seconds <= 3) {
+                sound(600, 150); 
+            }
+            
+            if(runtime.seconds <= 0) { 
+                clearInterval(runtime.interval); 
+                sound(900, 600); // Pitido de fin de ejercicio (Largo y agudo)
+                executeRestPhase(); 
+            } 
+        }, 1000); 
+    }
+    
     function executeRepsPhase() { runtime.currentPhase = 'work'; document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES"; document.getElementById('workout-timer').innerText = "GO"; }
-    function nextSegmentReps() { if(runtime.currentPhase === 'work' && mode === 'reps') { sound(700, 300); document.getElementById('btn-done-reps').style.display = 'none'; executeRestPhase(); } }
-    function executeRestPhase() { runtime.currentPhase = 'rest'; runtime.seconds = settings.rest; document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO"; updateTimerText(runtime.seconds); runtime.interval = setInterval(() => { runtime.seconds--; updateTimerText(runtime.seconds); if(runtime.seconds <= 0) { clearInterval(runtime.interval); sound(1000, 400); runtime.seriesLeft--; if(runtime.seriesLeft > 0) { refreshSeriesUILabel(); if(mode === 'time') executeTimePhase(); else { document.getElementById('btn-done-reps').style.display = 'block'; executeRepsPhase(); } } else finishWorkout(); } }, 1000); }
+    
+    function nextSegmentReps() { if(runtime.currentPhase === 'work' && mode === 'reps') { sound(900, 500); document.getElementById('btn-done-reps').style.display = 'none'; executeRestPhase(); } }
+    
+    function executeRestPhase() { 
+        runtime.currentPhase = 'rest'; runtime.seconds = settings.rest; 
+        document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO"; 
+        updateTimerText(runtime.seconds); 
+        
+        runtime.interval = setInterval(() => { 
+            runtime.seconds--; 
+            updateTimerText(runtime.seconds); 
+            
+            // TRIPLE BEEP: Suena en los segundos 3, 2 y 1 del descanso
+            if(runtime.seconds > 0 && runtime.seconds <= 3) {
+                sound(500, 150); 
+            }
+            
+            if(runtime.seconds <= 0) { 
+                clearInterval(runtime.interval); 
+                sound(850, 600); // Pitido largo de vuelta al trabajo
+                runtime.seriesLeft--; 
+                if(runtime.seriesLeft > 0) { 
+                    refreshSeriesUILabel(); 
+                    if(mode === 'time') executeTimePhase(); 
+                    else { document.getElementById('btn-done-reps').style.display = 'block'; executeRepsPhase(); } 
+                } else finishWorkout(); 
+            } 
+        }, 1000); 
+    }
+    
     function updateTimerText(val) { document.getElementById('workout-timer').innerText = val < 10 ? '0' + val : val; }
     function finishWorkout() { forceQuit(); alert("🎯 ¡Entrenamiento completado!"); }
     function forceQuit() { clearInterval(runtime.interval); goTo('modes'); }
