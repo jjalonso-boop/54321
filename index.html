@@ -145,6 +145,13 @@
         } catch(e) {}
     }
 
+    function playTripleBeepRest() {
+        sound(850, 80);
+        setTimeout(() => sound(850, 80), 280);
+        setTimeout(() => sound(850, 120), 560);
+    }
+    function playLongBeepWork() { sound(380, 750); }
+
     function goTo(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
@@ -200,6 +207,7 @@
             } else {
                 document.getElementById('rocket-text').innerText = "¡GO!";
                 document.getElementById('rocket-text').className = 'rocket-number launch-animation';
+                playLongBeepWork();
                 setTimeout(() => { overlay.style.display = 'none'; startTrain(); }, 1000);
             }
         }
@@ -210,45 +218,59 @@
         goTo('train'); runtime.seriesLeft = settings.series;
         document.getElementById('main-title').innerText = mode === 'time' ? "MODO TIEMPO" : "MODO REPETICIONES";
         document.getElementById('sub-title').innerText = "En marcha";
+        document.getElementById('p-series').innerText = '1/' + settings.series;
         if (mode === 'time') { document.getElementById('p-reps-box').style.display = 'none'; executeTime(); }
         else { document.getElementById('p-reps-box').style.display = 'block'; document.getElementById('p-reps').innerText = settings.reps; document.getElementById('btn-done-reps').style.display = 'block'; executeReps(); }
     }
 
     function executeTime() {
+        if (runtime.interval) clearInterval(runtime.interval);
         runtime.currentPhase = 'work'; runtime.seconds = settings.time;
         document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!";
+        updateTimer(runtime.seconds);
         runtime.interval = setInterval(() => {
             runtime.seconds--; updateTimer(runtime.seconds);
-            if (runtime.seconds <= 0) { clearInterval(runtime.interval); executeRest(); }
+            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(900, 120); }
+            if (runtime.seconds <= 0) { clearInterval(runtime.interval); playTripleBeepRest(); executeRest(); }
         }, 1000);
     }
 
     function executeReps() {
+        if (runtime.interval) clearInterval(runtime.interval);
         runtime.currentPhase = 'work';
         document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES";
         document.getElementById('workout-timer').innerText = "GO";
     }
 
-    function nextSegmentReps() { if(runtime.currentPhase === 'work') { document.getElementById('btn-done-reps').style.display = 'none'; executeRest(); } }
+    function nextSegmentReps() { if(runtime.currentPhase === 'work') { playTripleBeepRest(); document.getElementById('btn-done-reps').style.display = 'none'; executeRest(); } }
 
     function executeRest() {
+        if (runtime.interval) clearInterval(runtime.interval);
         runtime.currentPhase = 'rest'; runtime.seconds = settings.rest;
         document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO";
+        updateTimer(runtime.seconds);
         runtime.interval = setInterval(() => {
             runtime.seconds--; updateTimer(runtime.seconds);
+            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(340, 150); }
             if (runtime.seconds <= 0) {
                 clearInterval(runtime.interval); runtime.seriesLeft--;
                 if (runtime.seriesLeft > 0) {
+                    playLongBeepWork();
                     document.getElementById('p-series').innerText = (settings.series - runtime.seriesLeft + 1) + '/' + settings.series;
                     if (mode === 'time') executeTime(); else { document.getElementById('btn-done-reps').style.display = 'block'; executeReps(); }
-                } else finishWorkout();
+                } else { sound(600, 1200); finishWorkout(); }
             }
         }, 1000);
     }
 
-    function updateTimer(v) { document.getElementById('workout-timer').innerText = v < 10 ? '0' + v : v; }
+    function updateTimer(v) { 
+        var el = document.getElementById('workout-timer');
+        if (v >= 100) { el.classList.add('triple-digit'); el.innerText = v; } 
+        else { el.classList.remove('triple-digit'); el.innerText = v < 10 ? '0' + v : v; }
+    }
+    
     function forceQuit() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); }
-    function finishWorkout() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); alert("¡Entrenamiento completado!"); }
+    function finishWorkout() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); setTimeout(() => { alert("🎯 ¡Entrenamiento completado!"); }, 150); }
 </script>
 </body>
 </html>
