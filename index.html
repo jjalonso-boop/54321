@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro v1.1.1</title>
+    <title>Gym Space Pro</title>
     
-    <!-- LA LÍNEA CRUCIAL QUE FALTABA PARA PERMITIR LA INSTALACIÓN -->
     <link rel="manifest" href="./manifest.json">
     
     <meta name="mobile-web-app-capable" content="yes">
@@ -15,12 +14,9 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
 
     <script>
-        // Registrar el Service Worker al principio para que Chrome lo vea de inmediato
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(function(reg) { console.log('SW registrado con éxito'); })
-                    .catch(function(err) { console.log('Error SW', err); });
+                navigator.serviceWorker.register('./sw.js').catch(function(err) { console.log('SW error', err); });
             });
         }
     </script>
@@ -31,17 +27,17 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; }
         
-        .app-container { width: 100%; max-width: 390px; height: 95vh; display: flex; flex-direction: column; justify-content: space-between; transition: opacity 0.4s ease, transform 0.4s ease; }
+        .app-container { width: 100%; max-width: 390px; height: 95vh; display: flex; flex-direction: column; justify-content: space-between; }
 
         header { text-align: center; margin-bottom: 5px; }
         header h1 { font-family: var(--font-display); font-size: 3.2rem; letter-spacing: 2px; }
         header p { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
         
         .screen { display: none; flex-direction: column; flex-grow: 1; justify-content: center; }
-        .screen.active { display: flex; animation: fadeIn 0.3s ease-out forwards; }
+        .screen.active { display: flex; }
         
         .modes-container { display: flex; flex-direction: column; gap: 15px; }
-        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 35px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 35px 20px; border-radius: 20px; text-align: center; cursor: pointer; }
         .mode-card:active { border-color: var(--accent-color); transform: scale(0.97); }
         .mode-card h2 { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 1px; margin-bottom: 6px; }
         .mode-card p { font-size: 0.9rem; color: #888; line-height: 1.4; }
@@ -52,7 +48,7 @@
         .wheel-container { position: relative; height: 120px; width: 140px; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
         .wheel-container::-webkit-scrollbar { display: none; }
         .wheel-space { height: 40px; }
-        .wheel-item { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); font-weight: 400; scroll-snap-align: center; white-space: nowrap; }
+        .wheel-item { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); scroll-snap-align: center; }
         .wheel-item.selected { color: var(--accent-color); font-weight: 700; font-size: 1.6rem; }
         
         .workout-ui { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
@@ -60,7 +56,7 @@
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
         
-        .timer-number { font-family: var(--font-display); font-size: 15rem; font-weight: 900; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; transition: font-size 0.2s ease; }
+        .timer-number { font-family: var(--font-display); font-size: 15rem; font-weight: 900; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; }
         .timer-number.triple-digit { font-size: 9.5rem; letter-spacing: -2px; }
         
         .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 15px; }
@@ -71,15 +67,11 @@
         .actions { display: flex; gap: 15px; width: 100%; }
         
         .btn { flex: 1; padding: 22px; border-radius: 18px; border: none; font-family: var(--font-body); font-weight: 700; font-size: 1.2rem; cursor: pointer; }
-        .btn:active { opacity: 0.75; }
-        .btn-go { background: var(--accent-color); color: #000; }
-        .btn-stop { background: #222; color: #fff; }
         
         .rocket-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(13,13,13,0.98); display: none; align-items: center; justify-content: center; z-index: 999; }
         .rocket-number { font-family: var(--font-display); font-size: 16rem; font-weight: 900; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
         @keyframes rocketPulse { 0% { opacity: 1; transform: scale(2.5); } 80% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(0.2); } }
         .launch-animation { animation: rocketPulse 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -101,8 +93,8 @@
         <div class="selectors-list" id="selectors-render"></div>
         <div class="actions-wrapper">
             <div class="actions">
-                <button class="btn btn-stop" onclick="goTo('modes')">Atrás</button>
-                <button class="btn btn-go" onclick="triggerRocketLaunch()">IGNICIÓN 🚀</button>
+                <button class="btn" style="background:#222;color:#fff;" onclick="goTo('modes')">Atrás</button>
+                <button class="btn" style="background:#CCFF00;color:#000;" onclick="triggerRocketLaunch()">IGNICIÓN 🚀</button>
             </div>
         </div>
     </div>
@@ -118,8 +110,8 @@
         </div>
         <div class="actions-wrapper">
             <div class="actions">
-                <button class="btn btn-go" id="btn-done-reps" onclick="nextSegmentReps()" style="display:none; background-color: #fff; color: #000; font-size: 1.4rem;">¡HECHO!</button>
-                <button class="btn btn-stop" style="background-color: #ba1a1a;" onclick="forceQuit()">PARAR</button>
+                <button class="btn" id="btn-done-reps" onclick="nextSegmentReps()" style="display:none; background:#fff;color:#000;font-size:1.4rem;">¡HECHO!</button>
+                <button class="btn" style="background:#ba1a1a;color:#fff;" onclick="forceQuit()">PARAR</button>
             </div>
         </div>
     </div>
@@ -128,306 +120,135 @@
 <div class="rocket-screen" id="rocket-screen"><div class="rocket-number" id="rocket-text">5</div></div>
 
 <script>
-    var mode = 'time'; 
-    var settings = { time: 45, reps: 10, rest: 15, series: 3 };
-    var runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
-    
-    var audioCtx = null;
+    var mode = 'time', settings = { time: 45, reps: 10, rest: 15, series: 3 }, runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
+    var audioCtx = null, wakeLock = null;
+
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log(err); }
+        }
+    }
+    function releaseWakeLock() {
+        if (wakeLock) { wakeLock.release().then(() => wakeLock = null); }
+    }
+    document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
 
     function sound(freq, duration) {
         try {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            var osc = audioCtx.createOscillator(); 
-            var gain = audioCtx.createGain();
-            osc.type = 'triangle'; 
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-            osc.connect(gain); 
-            gain.connect(audioCtx.destination);
-            osc.start(); 
-            setTimeout(function() { 
-                try { 
-                    osc.stop(); 
-                    osc.disconnect(); 
-                } catch(e){} 
-            }, duration);
-        } catch(e) { 
-            console.log("Audio bloqueado"); 
-        }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'triangle'; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); setTimeout(() => { osc.stop(); osc.disconnect(); }, duration);
+        } catch(e) {}
     }
 
-    function playTripleBeepRest() {
-        sound(850, 80);
-        setTimeout(function() { sound(850, 80); }, 280);
-        setTimeout(function() { sound(850, 120); }, 560);
+    function goTo(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+        if (id === 'modes') { document.getElementById('main-title').innerText = "GYM SPACE PRO"; document.getElementById('sub-title').innerText = "Elige modalidad"; }
     }
 
-    function playLongBeepWork() {
-        sound(380, 750);
-    }
-
-    function initAudioOnFirstTouch() {
-        if (!audioCtx) {
-            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-        }
-    }
-
-    function goTo(screenId) {
-        var screens = document.querySelectorAll('.screen');
-        for (var i = 0; i < screens.length; i++) {
-            screens[i].classList.remove('active');
-        }
-        document.getElementById('screen-' + screenId).classList.add('active');
-        if (screenId === 'modes') { 
-            document.getElementById('main-title').innerText = "GYM SPACE PRO"; 
-            document.getElementById('sub-title').innerText = "Elige modalidad"; 
-        }
-    }
-
-    function chooseMode(selectedMode) {
-        initAudioOnFirstTouch();
-        sound(500, 50); 
-        mode = selectedMode;
-        document.getElementById('sub-title').innerText = mode === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
-        var container = document.getElementById('selectors-render'); 
-        container.innerHTML = ''; 
-        
-        if (mode === 'time') {
-            var timeOpts = [
-                {v: 10, t: "10 sg"}, {v: 15, t: "15 sg"}, {v: 20, t: "20 sg"}, 
-                {v: 30, t: "30 sg"}, {v: 45, t: "45 sg"}, {v: 60, t: "60 sg"}, 
-                {v: 75, t: "75 sg"}, {v: 90, t: "90 sg"}, {v: 120, t: "120 sg (2m)"}, 
-                {v: 180, t: "180 sg (3m)"}, {v: 240, t: "240 sg (4m)"}, {v: 300, t: "300 sg (5m)"}
-            ];
-            container.appendChild(createWheelRow('Tiempo Ejercicio', 'time', timeOpts, 45));
-        } else {
-            var repsOpts = [
-                {v: 5, t: "5"}, {v: 8, t: "8"}, {v: 10, t: "10"}, {v: 12, t: "12"}, 
-                {v: 15, t: "15"}, {v: 20, t: "20"}, {v: 25, t: "25"}, {v: 30, t: "30"}, 
-                {v: 40, t: "40"}, {v: 50, t: "50"}
-            ];
-            container.appendChild(createWheelRow('Repeticiones', 'reps', repsOpts, 10));
-        }
-        
-        var restOpts = [
-            {v: 5, t: "5 sg"}, {v: 10, t: "10 sg"}, {v: 15, t: "15 sg"}, 
-            {v: 20, t: "20 sg"}, {v: 25, t: "25 sg"}, {v: 30, t: "30 sg"}, 
-            {v: 45, t: "45 sg"}, {v: 60, t: "60 sg"}, {v: 90, t: "90 sg"},
-            {v: 120, t: "120 sg (2m)"}, {v: 180, t: "180 sg (3m)"}
-        ];
-        container.appendChild(createWheelRow('Descanso', 'rest', restOpts, 15));
-        
-        var seriesOpts = [
-            {v: 1, t: "1"}, {v: 2, t: "2"}, {v: 3, t: "3"}, {v: 4, t: "4"}, 
-            {v: 5, t: "5"}, {v: 6, t: "6"}, {v: 7, t: "7"}, {v: 8, t: "8"}, 
-            {v: 9, t: "9"}, {v: 10, t: "10"}
-        ];
-        container.appendChild(createWheelRow('Series Totales', 'series', seriesOpts, 3));
+    function chooseMode(m) {
+        mode = m; document.getElementById('sub-title').innerText = m === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
+        var container = document.getElementById('selectors-render'); container.innerHTML = '';
+        var timeOpts = [10,15,20,30,45,60,75,90,120,180,240,300];
+        var repsOpts = [5,8,10,12,15,20,25,30,40,50];
+        if (mode === 'time') container.appendChild(createWheel('Tiempo Ejercicio', 'time', timeOpts.map(v => ({v, t: v + " sg"})), 45));
+        else container.appendChild(createWheel('Repeticiones', 'reps', repsOpts.map(v => ({v, t: v})), 10));
+        container.appendChild(createWheel('Descanso', 'rest', [5,10,15,20,25,30,45,60,90,120,180].map(v => ({v, t: v + " sg"})), 15));
+        container.appendChild(createWheel('Series Totales', 'series', [1,2,3,4,5,6,7,8,9,10].map(v => ({v, t: v})), 3));
         goTo('setup');
     }
 
-    function createWheelRow(label, key, options, defaultVal) {
-        var row = document.createElement('div'); 
-        row.className = 'picker-row';
-        var labelDiv = document.createElement('div'); 
-        labelDiv.className = 'picker-label'; 
-        labelDiv.innerText = label; 
-        row.appendChild(labelDiv);
-        
-        var wheelContainer = document.createElement('div'); 
-        wheelContainer.className = 'wheel-container';
-        wheelContainer.appendChild(document.createElement('div')).className = 'wheel-space';
-        
-        var defaultIndex = 0;
-        options.forEach(function(opt, idx) {
-            var item = document.createElement('div'); 
-            item.className = 'wheel-item'; 
-            item.innerText = opt.t; 
-            item.setAttribute('data-value', opt.v);
-            if (opt.v === defaultVal) defaultIndex = idx; 
-            wheelContainer.appendChild(item);
+    function createWheel(label, key, opts, def) {
+        var row = document.createElement('div'); row.className = 'picker-row';
+        row.innerHTML = `<div class="picker-label">${label}</div><div class="wheel-container"></div>`;
+        var cont = row.querySelector('.wheel-container');
+        cont.appendChild(document.createElement('div')).className = 'wheel-space';
+        opts.forEach((o, i) => {
+            var div = document.createElement('div'); div.className = 'wheel-item'; div.innerText = o.t; div.dataset.v = o.v;
+            cont.appendChild(div);
         });
-        
-        wheelContainer.appendChild(document.createElement('div')).className = 'wheel-space';
-        
-        function updateSelected() {
-            var containerCenter = wheelContainer.scrollTop + 60;
-            var items = wheelContainer.querySelectorAll('.wheel-item');
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
-                var dist = Math.abs(containerCenter - (item.offsetTop + 20));
-                if (dist < 30) { 
-                    item.classList.add('selected'); 
-                    settings[key] = parseInt(item.getAttribute('data-value')); 
-                } else {
-                    item.classList.remove('selected');
-                }
-            }
-        }
-        
-        wheelContainer.addEventListener('scroll', updateSelected); 
-        row.appendChild(wheelContainer);
-        
-        setTimeout(function() { 
-            wheelContainer.scrollTop = defaultIndex * 40; 
-            updateSelected(); 
-        }, 50);
-        
+        cont.appendChild(document.createElement('div')).className = 'wheel-space';
+        cont.onscroll = () => {
+            var center = cont.scrollTop + 60;
+            cont.querySelectorAll('.wheel-item').forEach(el => {
+                var dist = Math.abs(center - (el.offsetTop + 20));
+                if (dist < 30) { el.classList.add('selected'); settings[key] = parseInt(el.dataset.v); } else el.classList.remove('selected');
+            });
+        };
+        setTimeout(() => { 
+            var idx = opts.findIndex(o => o.v === def); 
+            cont.scrollTop = idx * 40; cont.onscroll(); 
+        }, 100);
         return row;
     }
 
     function triggerRocketLaunch() {
-        initAudioOnFirstTouch();
-        var overlay = document.getElementById('rocket-screen'); 
-        var textNode = document.getElementById('rocket-text');
-        overlay.style.display = 'flex'; 
-        var countdown = 5;
-        
-        function runPulse() {
-            if (countdown > 0) {
-                textNode.innerText = countdown; 
-                textNode.className = 'rocket-number launch-animation';
-                sound(340, 180); 
-                setTimeout(function() { 
-                    textNode.className = 'rocket-number'; 
-                    countdown--; 
-                    setTimeout(runPulse, 50); 
-                }, 950);
+        requestWakeLock();
+        var overlay = document.getElementById('rocket-screen'), count = 5;
+        overlay.style.display = 'flex';
+        function run() {
+            if (count > 0) {
+                document.getElementById('rocket-text').innerText = count;
+                document.getElementById('rocket-text').className = 'rocket-number launch-animation';
+                sound(340, 150);
+                setTimeout(() => { document.getElementById('rocket-text').className = 'rocket-number'; count--; setTimeout(run, 50); }, 950);
             } else {
-                textNode.innerText = "¡GO!"; 
-                textNode.className = 'rocket-number launch-animation';
-                playLongBeepWork(); 
-                setTimeout(function() { 
-                    overlay.style.display = 'none'; 
-                    startWorkoutEngine(); 
-                }, 1000);
+                document.getElementById('rocket-text').innerText = "¡GO!";
+                document.getElementById('rocket-text').className = 'rocket-number launch-animation';
+                setTimeout(() => { overlay.style.display = 'none'; startTrain(); }, 1000);
             }
         }
-        runPulse();
+        run();
     }
 
-    function startWorkoutEngine() {
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        goTo('train'); 
-        runtime.seriesLeft = settings.series; 
-        refreshSeriesUILabel();
+    function startTrain() {
+        goTo('train'); runtime.seriesLeft = settings.series;
         document.getElementById('main-title').innerText = mode === 'time' ? "MODO TIEMPO" : "MODO REPETICIONES";
         document.getElementById('sub-title').innerText = "En marcha";
-        
-        if (mode === 'time') { 
-            document.getElementById('p-reps-box').style.display = 'none'; 
-            document.getElementById('btn-done-reps').style.display = 'none'; 
-            executeTimePhase(); 
-        } else { 
-            document.getElementById('p-reps-box').style.display = 'block'; 
-            document.getElementById('p-reps').innerText = settings.reps; 
-            document.getElementById('btn-done-reps').style.display = 'block'; 
-            executeRepsPhase(); 
-        }
+        if (mode === 'time') { document.getElementById('p-reps-box').style.display = 'none'; executeTime(); }
+        else { document.getElementById('p-reps-box').style.display = 'block'; document.getElementById('p-reps').innerText = settings.reps; document.getElementById('btn-done-reps').style.display = 'block'; executeReps(); }
     }
 
-    function refreshSeriesUILabel() { 
-        document.getElementById('p-series').innerText = (settings.series - runtime.seriesLeft + 1) + '/' + settings.series; 
-    }
-    
-    function executeTimePhase() { 
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        runtime.currentPhase = 'work'; 
-        runtime.seconds = settings.time; 
-        document.getElementById('workout-badge').className = "badge work"; 
-        document.getElementById('workout-badge').innerText = "¡DALE!"; 
-        updateTimerText(runtime.seconds); 
-        
-        runtime.interval = setInterval(function() { 
-            runtime.seconds--; 
-            updateTimerText(runtime.seconds); 
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(900, 120); }
-            if (runtime.seconds <= 0) { 
-                clearInterval(runtime.interval); 
-                playTripleBeepRest(); 
-                executeRestPhase(); 
-            } 
-        }, 1000); 
-    }
-    
-    function executeRepsPhase() { 
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        runtime.currentPhase = 'work'; 
-        document.getElementById('workout-badge').className = "badge work"; 
-        document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES"; 
-        
-        var timerElement = document.getElementById('workout-timer');
-        timerElement.classList.remove('triple-digit');
-        timerElement.innerText = "GO"; 
-    }
-    
-    function nextSegmentReps() { 
-        if (runtime.currentPhase === 'work' && mode === 'reps') { 
-            playTripleBeepRest(); 
-            document.getElementById('btn-done-reps').style.display = 'none'; 
-            executeRestPhase(); 
-        } 
-    }
-    
-    function executeRestPhase() { 
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        runtime.currentPhase = 'rest'; 
-        runtime.seconds = settings.rest; 
-        document.getElementById('workout-badge').className = "badge rest"; 
-        document.getElementById('workout-badge').innerText = "DESCANSO"; 
-        updateTimerText(runtime.seconds); 
-        
-        runtime.interval = setInterval(function() { 
-            runtime.seconds--; 
-            updateTimerText(runtime.seconds); 
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(340, 150); }
-            if (runtime.seconds <= 0) { 
-                clearInterval(runtime.interval); 
-                runtime.seriesLeft--; 
-                
-                if (runtime.seriesLeft > 0) { 
-                    playLongBeepWork(); 
-                    refreshSeriesUILabel(); 
-                    if (mode === 'time') { 
-                        executeTimePhase(); 
-                    } else { 
-                        document.getElementById('btn-done-reps').style.display = 'block'; 
-                        executeRepsPhase(); 
-                    } 
-                } else { 
-                    sound(600, 1200); 
-                    finishWorkout(); 
-                } 
-            } 
-        }, 1000); 
-    }
-    
-    function updateTimerText(val) { 
-        var timerElement = document.getElementById('workout-timer');
-        
-        if (val >= 100) {
-            timerElement.classList.add('triple-digit');
-            timerElement.innerText = val;
-        } else {
-            timerElement.classList.remove('triple-digit');
-            timerElement.innerText = val < 10 ? '0' + val : val; 
-        }
-    }
-    
-    function forceQuit() { 
-        if (runtime.interval) { clearInterval(runtime.interval); }
-        goTo('modes'); 
+    function executeTime() {
+        runtime.currentPhase = 'work'; runtime.seconds = settings.time;
+        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!";
+        runtime.interval = setInterval(() => {
+            runtime.seconds--; updateTimer(runtime.seconds);
+            if (runtime.seconds <= 0) { clearInterval(runtime.interval); executeRest(); }
+        }, 1000);
     }
 
-    function finishWorkout() { 
-        forceQuit(); 
-        setTimeout(function() { alert("🎯 ¡Entrenamiento completado!"); }, 150);
+    function executeReps() {
+        runtime.currentPhase = 'work';
+        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES";
+        document.getElementById('workout-timer').innerText = "GO";
     }
+
+    function nextSegmentReps() { if(runtime.currentPhase === 'work') { document.getElementById('btn-done-reps').style.display = 'none'; executeRest(); } }
+
+    function executeRest() {
+        runtime.currentPhase = 'rest'; runtime.seconds = settings.rest;
+        document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO";
+        runtime.interval = setInterval(() => {
+            runtime.seconds--; updateTimer(runtime.seconds);
+            if (runtime.seconds <= 0) {
+                clearInterval(runtime.interval); runtime.seriesLeft--;
+                if (runtime.seriesLeft > 0) {
+                    document.getElementById('p-series').innerText = (settings.series - runtime.seriesLeft + 1) + '/' + settings.series;
+                    if (mode === 'time') executeTime(); else { document.getElementById('btn-done-reps').style.display = 'block'; executeReps(); }
+                } else finishWorkout();
+            }
+        }, 1000);
+    }
+
+    function updateTimer(v) { document.getElementById('workout-timer').innerText = v < 10 ? '0' + v : v; }
+    function forceQuit() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); }
+    function finishWorkout() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); alert("¡Entrenamiento completado!"); }
 </script>
 </body>
 </html>
