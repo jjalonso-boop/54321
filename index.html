@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>54321 - PNL Contra la Procrastinación</title>
+    <title>Gym Timer V3.1</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 text-anchor=%22middle%22>54321</text></svg>">
+    <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 text-anchor=%22middle%22>GYM</text></svg>">
     
-    <!-- Chart.js para recuperar tus estadísticas con estilo -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -74,7 +73,6 @@
             display: flex;
         }
 
-        /* Cabeceras de pantalla */
         .screen-header {
             text-align: center;
             padding: 10px 0;
@@ -95,7 +93,7 @@
             letter-spacing: 1px;
         }
 
-        /* --- PANTALLA DE INICIO (MODOS Y ESTADÍSTICAS) --- */
+        /* --- PANTALLA DE INICIO (ESTILO GYM V3.0) --- */
         .modes-list {
             display: flex;
             flex-direction: column;
@@ -110,8 +108,6 @@
             border-radius: 24px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
 
         .mode-card:active {
@@ -140,7 +136,7 @@
             border: 1px solid #222;
         }
 
-        /* --- PANTALLA DE AJUSTES (CONTROLES DESLIZANTES LA CAÑA) --- */
+        /* --- CONTROLES DESLIZANTES --- */
         .setup-controls {
             display: flex;
             flex-direction: column;
@@ -197,14 +193,10 @@
             transition: transform 0.1s;
         }
 
-        input[type="range"]::-webkit-slider-thumb:active {
-            transform: scale(1.2);
-        }
-
-        /* --- PANTALLA DE ENTRENAMIENTO (¡EL EQUILIBRIO PERFECTO!) --- */
+        /* --- PANTALLA ENTRENAMIENTO (MÁXIMA VISIBILIDAD SIN SOLAPAR) --- */
         .train-status-panel {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .badge {
@@ -217,7 +209,6 @@
             border: 1.5px solid var(--accent-color);
             color: var(--accent-color);
             display: inline-block;
-            transition: all 0.3s ease;
         }
 
         body.phase-rest .badge {
@@ -225,25 +216,23 @@
             color: var(--rest-color);
         }
 
-        /* Números aumentados al tamaño óptimo sin perder la estructura ni solaparse */
+        /* Números al tamaño grande perfecto (se adaptan sin tocar los bordes) */
         .timer-number {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 26vh; /* Tamaño dinámico intermedio y súper visible */
+            font-size: 22vh; 
             font-weight: 900;
             line-height: 0.85;
-            margin-top: 15px;
-            margin-bottom: 15px;
-            letter-spacing: -2px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
-            transition: color 0.3s ease;
         }
 
         body.phase-rest .timer-number {
             color: var(--rest-color);
-            text-shadow: 0 0 30px rgba(0, 150, 255, 0.15);
         }
 
-        /* El botón de impacto mola mucho con el texto descriptivo dinámico */
+        /* El botón de impacto con la estructura original */
         .giant-action-zone {
             flex-grow: 1;
             display: flex;
@@ -255,9 +244,8 @@
             border: 2px solid #222;
             margin: 10px 0 20px 0;
             cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            min-height: 140px;
+            transition: all 0.15s ease;
+            min-height: 150px;
         }
 
         .giant-action-zone:active {
@@ -277,8 +265,6 @@
             color: #555;
             text-align: center;
             letter-spacing: 1px;
-            pointer-events: none;
-            line-height: 1.1;
         }
 
         .giant-action-subtext {
@@ -288,22 +274,11 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-top: 8px;
-            pointer-events: none;
         }
 
-        .giant-action-zone:active .giant-action-text {
-            color: var(--accent-color);
-        }
+        .giant-action-zone:active .giant-action-text { color: var(--accent-color); }
+        .giant-action-zone:active .giant-action-subtext { color: var(--text-main); }
 
-        .giant-action-zone:active .giant-action-subtext {
-            color: var(--text-main);
-        }
-
-        body.phase-rest .giant-action-zone:active .giant-action-text {
-            color: var(--rest-color);
-        }
-
-        /* Botones de acción común */
         .btn {
             width: 100%;
             padding: 20px;
@@ -314,77 +289,57 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .btn-primary {
-            background: var(--accent-color);
-            color: #000;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.97);
-            filter: brightness(0.9);
-        }
-
-        .btn-secondary {
-            background: #1c1c1e;
-            color: #ff3b30;
-            border: 1px solid #2c2c2e;
-            padding: 16px;
-        }
-
-        .btn-secondary:active {
-            background: #2c2c2e;
-        }
+        .btn-primary { background: var(--accent-color); color: #000; }
+        .btn-secondary { background: #1c1c1e; color: #ff3b30; border: 1px solid #2c2c2e; padding: 16px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
 
-    <!-- 1. PANTALLA PRINCIPAL CON MODOS Y TU HISTÓRICO GRÁFICO -->
+    <!-- 1. PANTALLA PRINCIPAL: ESTILO GYM ORIGINAL -->
     <div id="screen-modes" class="screen active">
         <div class="screen-header">
-            <h1>54321</h1>
-            <p>Adiós a la procrastinación</p>
+            <h1>GYM WORKOUT</h1>
+            <p>Temporizador de Intervalos V3.1</p>
         </div>
 
         <div class="modes-list">
             <div class="mode-card" onclick="chooseMode('time')">
                 <h2>MODO TIEMPO</h2>
-                <p>Completa series de intervalos temporales puros guiados por el audio de cuenta atrás.</p>
+                <p>Configura intervalos de trabajo y descanso automáticos.</p>
             </div>
             <div class="mode-card" onclick="chooseMode('reps')">
                 <h2>MODO REPETICIONES</h2>
-                <p>Realiza las repeticiones a tu ritmo y pulsa el botón táctil de impacto al terminar.</p>
+                <p>Realiza tus repeticiones y salta al descanso manualmente.</p>
             </div>
         </div>
 
+        <!-- Gráfica interactiva real basada en entrenamientos completados -->
         <div class="chart-container">
-            <p style="font-size:0.75rem; text-transform:uppercase; font-weight:800; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px; text-align:center;">Frecuencia Semanal</p>
+            <p id="chart-title" style="font-size:0.75rem; text-transform:uppercase; font-weight:800; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px; text-align:center;">Tus Sesiones esta semana</p>
             <canvas id="history-chart" style="max-height: 110px; width:100%;"></canvas>
         </div>
     </div>
 
-    <!-- 2. PANTALLA DE CONFIGURACIÓN CON LOS SELECTORES DESLIZANTES -->
+    <!-- 2. PANTALLA DE AJUSTES -->
     <div id="screen-setup" class="screen">
         <div class="screen-header">
-            <h1 id="setup-title">PREPARACIÓN</h1>
-            <p>Configura las variables de tu objetivo</p>
+            <h1 id="setup-title">AJUSTES</h1>
+            <p>Configura tus series</p>
         </div>
 
-        <div class="setup-controls" id="selectors-render">
-            <!-- Renderizado dinámico desde JavaScript -->
-        </div>
+        <div class="setup-controls" id="selectors-render"></div>
 
         <div style="padding-bottom:10px;">
-            <button class="btn btn-primary" onclick="triggerRocketLaunch()">¡DESPEGAR COHETE! 🚀</button>
+            <button class="btn btn-primary" onclick="triggerRocketLaunch()">EMPEZAR ENTRENAMIENTO ⚡</button>
             <button class="btn btn-secondary" style="margin-top: 10px; color: var(--text-muted);" onclick="goBackToModes()">VOLVER</button>
         </div>
     </div>
 
-    <!-- 3. PANTALLA DE ENTRENAMIENTO / ACCIÓN -->
+    <!-- 3. PANTALLA DE ENTRENAMIENTO -->
     <div id="screen-train" class="screen">
         <div class="train-status-panel">
             <div id="workout-badge" class="badge">TRABAJO</div>
@@ -392,51 +347,74 @@
             <div id="series-counter" style="font-size: 0.95rem; font-weight:700; color:var(--text-muted); letter-spacing:1px;">SERIE 1 DE 4</div>
         </div>
 
-        <!-- Botón gigante de gran impacto táctil -->
         <div id="giant-btn" class="giant-action-zone" onclick="nextSegmentReps()">
-            <div id="giant-btn-text" class="giant-action-text">PULSA PARA<br>CONTINUAR</div>
-            <div id="giant-btn-subtext" class="giant-action-subtext">MODO REPETICIONES ACTIVO</div>
+            <div id="giant-btn-text" class="giant-action-text">PULSA AL ACABAR</div>
+            <div id="giant-btn-subtext" class="giant-action-subtext">Siguiente Serie</div>
         </div>
 
         <div style="padding-bottom:10px;">
-            <button class="btn btn-secondary" onclick="forceQuit()">DETENER COHETE</button>
+            <button class="btn btn-secondary" onclick="forceQuit()">DETENER</button>
         </div>
     </div>
 
 </div>
 
 <script>
-    // Inicialización de ajustes y sistema
     var settings = { time: 45, rest: 30, series: 4, reps: 10 };
     var mode = 'time';
-    var runtime = { 
-        currentSeries: 1, 
-        currentPhase: 'work', 
-        secondsLeft: 0, 
-        interval: null, 
-        audioCtx: null 
-    };
+    var runtime = { currentSeries: 1, currentPhase: 'work', secondsLeft: 0, interval: null, audioCtx: null };
+    var chartInstance = null;
 
-    // Renderizar gráfico de rendimiento al cargar la página
     document.addEventListener("DOMContentLoaded", () => {
         renderChart();
     });
 
+    // --- GRÁFICA INTERACTIVA REAL CON LOCALSTORAGE ---
+    function getWorkoutHistory() {
+        let history = localStorage.getItem('gym_workout_history_v3');
+        if (!history) {
+            // Inicializar datos vacíos reales si no existen
+            history = JSON.stringify({ 'Lun': 0, 'Mar': 0, 'Mié': 0, 'Jue': 0, 'Vie': 0, 'Sáb': 0, 'Dom': 0 });
+            localStorage.setItem('gym_workout_history_v3', history);
+        }
+        return JSON.parse(history);
+    }
+
+    function recordCompletedWorkout() {
+        let history = getWorkoutHistory();
+        const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        let todayName = days[new Date().getDay()];
+        
+        history[todayName] = (history[todayName] || 0) + 1;
+        localStorage.setItem('gym_workout_history_v3', JSON.stringify(history));
+        
+        // Actualizar la gráfica al momento
+        renderChart();
+    }
+
     function renderChart() {
         const ctx = document.getElementById('history-chart').getContext('2d');
-        new Chart(ctx, {
+        const historyData = getWorkoutHistory();
+        const labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const dataValues = labels.map(day => historyData[day] || 0);
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                labels: labels,
                 datasets: [{
-                    label: 'Despegues',
-                    data: [3, 5, 2, 8, 4, 6, 9],
+                    label: 'Sesiones',
+                    data: dataValues,
                     borderColor: '#CCFF00',
                     backgroundColor: 'rgba(204, 255, 0, 0.05)',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 3,
+                    pointRadius: 4,
                     pointBackgroundColor: '#CCFF00'
                 }]
             },
@@ -445,18 +423,25 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { display: false }, ticks: { color: '#8e8e93', font: { size: 10 } } },
-                    y: { grid: { color: '#222' }, ticks: { color: '#8e8e93', font: { size: 10 }, stepSize: 2 } }
+                    y: { 
+                        grid: { color: '#222' }, 
+                        ticks: { 
+                            color: '#8e8e93', 
+                            font: { size: 10 }, 
+                            stepSize: 1,
+                            precision: 0
+                        } 
+                    }
                 }
             }
         });
     }
 
-    // Navegación de menús
+    // --- FLUJO DE LA APLICACIÓN ---
     function chooseMode(selectedMode) {
         mode = selectedMode;
         document.getElementById('screen-modes').classList.remove('active');
         document.getElementById('screen-setup').classList.add('active');
-        
         document.getElementById('setup-title').innerText = mode === 'time' ? 'MODO TIEMPO' : 'MODO REPETICIONES';
         renderSelectors();
     }
@@ -466,25 +451,24 @@
         document.getElementById('screen-modes').classList.add('active');
     }
 
-    // Render de los controles táctiles de la versión original
     function renderSelectors() {
         const container = document.getElementById('selectors-render');
         if (mode === 'time') {
             container.innerHTML = `
                 <div class="control-group">
-                    <div class="control-label"><span>Tiempo de Trabajo</span><span id="val-time">${settings.time}s</span></div>
+                    <div class="control-label"><span>Trabajo</span><span id="val-time">${settings.time}s</span></div>
                     <div class="slider-wrapper">
                         <input type="range" min="5" max="120" step="5" value="${settings.time}" oninput="settings.time=parseInt(this.value); document.getElementById('val-time').innerText=this.value+'s'">
                     </div>
                 </div>
                 <div class="control-group">
-                    <div class="control-label"><span>Intervalo de Descanso</span><span id="val-rest">${settings.rest}s</span></div>
+                    <div class="control-label"><span>Descanso</span><span id="val-rest">${settings.rest}s</span></div>
                     <div class="slider-wrapper">
                         <input type="range" min="5" max="120" step="5" value="${settings.rest}" oninput="settings.rest=parseInt(this.value); document.getElementById('val-rest').innerText=this.value+'s'">
                     </div>
                 </div>
                 <div class="control-group">
-                    <div class="control-label"><span>Series Totales</span><span id="val-series">${settings.series}</span></div>
+                    <div class="control-label"><span>Series</span><span id="val-series">${settings.series}</span></div>
                     <div class="slider-wrapper">
                         <input type="range" min="1" max="15" step="1" value="${settings.series}" oninput="settings.series=parseInt(this.value); document.getElementById('val-series').innerText=this.value">
                     </div>
@@ -493,19 +477,19 @@
         } else {
             container.innerHTML = `
                 <div class="control-group">
-                    <div class="control-label"><span>Repeticiones Objetivo</span><span id="val-reps">${settings.reps}</span></div>
+                    <div class="control-label"><span>Repeticiones</span><span id="val-reps">${settings.reps}</span></div>
                     <div class="slider-wrapper">
                         <input type="range" min="5" max="50" step="5" value="${settings.reps}" oninput="settings.reps=parseInt(this.value); document.getElementById('val-reps').innerText=this.value">
                     </div>
                 </div>
                 <div class="control-group">
-                    <div class="control-label"><span>Intervalo de Descanso</span><span id="val-rest">${settings.rest}s</span></div>
+                    <div class="control-label"><span>Descanso</span><span id="val-rest">${settings.rest}s</span></div>
                     <div class="slider-wrapper">
                         <input type="range" min="5" max="120" step="5" value="${settings.rest}" oninput="settings.rest=parseInt(this.value); document.getElementById('val-rest').innerText=this.value+'s'">
                     </div>
                 </div>
                 <div class="control-group">
-                    <div class="control-label"><span>Series Totales</span><span id="val-series">${settings.series}</span></div>
+                    <div class="control-label"><span>Series</span><span id="val-series">${settings.series}</span></div>
                     <div class="slider-wrapper">
                         <input type="range" min="1" max="15" step="1" value="${settings.series}" oninput="settings.series=parseInt(this.value); document.getElementById('val-series').innerText=this.value">
                     </div>
@@ -514,7 +498,6 @@
         }
     }
 
-    // Iniciar el temporizador
     function triggerRocketLaunch() {
         document.getElementById('screen-setup').classList.remove('active');
         document.getElementById('screen-train').classList.add('active');
@@ -526,14 +509,14 @@
             document.getElementById('giant-btn').style.opacity = "0.3";
             document.getElementById('giant-btn').style.pointerEvents = "none";
             document.getElementById('giant-btn-text').innerHTML = "AUTOMÁTICO";
-            document.getElementById('giant-btn-subtext').innerText = "ESPERA AL FIN DEL INTERVALO";
+            document.getElementById('giant-btn-subtext').innerText = "CONCENTRACIÓN TOTAL";
             runTimer(settings.time);
         } else {
             document.getElementById('giant-btn').style.opacity = "1";
             document.getElementById('giant-btn').style.pointerEvents = "auto";
             document.getElementById('workout-timer').innerText = settings.reps;
-            document.getElementById('giant-btn-text').innerHTML = "PULSA AL ACABAR";
-            document.getElementById('giant-btn-subtext').innerText = "MODO MANUAL - REPS: " + settings.reps;
+            document.getElementById('giant-btn-text').innerHTML = "PULSA AL TERMINAR";
+            document.getElementById('giant-btn-subtext').innerText = "REGISTRA TU SERIE";
         }
     }
 
@@ -554,7 +537,6 @@
         }
     }
 
-    // Ejecutar el temporizador con la PNL de los 5 segundos
     function runTimer(seconds) {
         runtime.secondsLeft = seconds;
         updateTimerDisplay();
@@ -565,7 +547,7 @@
             runtime.secondsLeft--;
             updateTimerDisplay();
 
-            // PNL: Avisar con sonidos rítmicos en los últimos 5 segundos exactos (5, 4, 3, 2, 1)
+            // Cuenta atrás sonora en los 5 segundos finales exactos
             if (runtime.secondsLeft <= 5 && runtime.secondsLeft > 0) {
                 playBeep('tick');
             }
@@ -591,16 +573,17 @@
         setPhase('rest');
         document.getElementById('giant-btn').style.opacity = "0.3";
         document.getElementById('giant-btn').style.pointerEvents = "none";
-        document.getElementById('giant-btn-text').innerHTML = "DESCANSO";
-        document.getElementById('giant-btn-subtext').innerText = "APROVECHA PARA EXPIRAR Y PREPARARTE";
+        document.getElementById('giant-btn-text').innerHTML = "RECUPERA";
+        document.getElementById('giant-btn-subtext').innerText = "RESPIRA PROFUNDO";
         runTimer(settings.rest);
     }
 
     function executeWork() {
         runtime.currentSeries++;
         if (runtime.currentSeries > settings.series) {
-            alert("🚀 ¡Felicidades! ¡El cohete ha completado su órbita con éxito!");
-            location.reload();
+            recordCompletedWorkout(); // REGISTRO REAL EN LA GRÁFICA
+            alert("💪 ¡Excelente! Entrenamiento guardado y completado.");
+            forceQuit();
         } else {
             setPhase('work');
             if (mode === 'time') {
@@ -609,13 +592,12 @@
                 document.getElementById('workout-timer').innerText = settings.reps;
                 document.getElementById('giant-btn').style.opacity = "1";
                 document.getElementById('giant-btn').style.pointerEvents = "auto";
-                document.getElementById('giant-btn-text').innerHTML = "PULSA AL ACABAR";
-                document.getElementById('giant-btn-subtext').innerText = "MODO MANUAL - REPS: " + settings.reps;
+                document.getElementById('giant-btn-text').innerHTML = "PULSA AL TERMINAR";
+                document.getElementById('giant-btn-subtext').innerText = "REGISTRA TU SERIE";
             }
         }
     }
 
-    // Lógica del modo Repeticiones con el botón de impacto
     function nextSegmentReps() {
         if (mode === 'reps' && runtime.currentPhase === 'work') {
             executeRest();
@@ -624,10 +606,11 @@
 
     function forceQuit() {
         clearInterval(runtime.interval);
-        location.reload();
+        document.getElementById('screen-train').classList.remove('active');
+        document.getElementById('screen-modes').classList.add('active');
+        document.body.classList.remove('phase-rest');
     }
 
-    // Audio sintetizado (Beeps nativos limpios)
     function playBeep(type) {
         try {
             if (!runtime.audioCtx) {
@@ -659,7 +642,7 @@
                 osc.stop(runtime.audioCtx.currentTime + 0.4);
             }
         } catch (e) {
-            console.log("Audio no activado por interacción inicial de usuario.", e);
+            console.log("Audio temporalmente bloqueado", e);
         }
     }
 </script>
