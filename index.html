@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro</title>
+    <title>Gym Space Pro v2.0</title>
     
     <link rel="manifest" href="./manifest.json">
     
@@ -12,6 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
+
+    <!-- Librería Chart.js cargada de forma ultraligera para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -22,8 +25,17 @@
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght=400;700&display=swap');
-        :root { --bg-color: #0d0d0d; --surface-color: #161616; --accent-color: #CCFF00; --rest-color: #0096ff; --text-main: #ffffff; --text-muted: #333333; --font-display: 'Bebas Neue', sans-serif; --font-body: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght=400;500;700&display=swap');
+        :root { 
+            --bg-color: #0d0d0d; 
+            --surface-color: #161616; 
+            --accent-color: #CCFF00; 
+            --rest-color: #0096ff; 
+            --text-main: #ffffff; 
+            --text-muted: #888888; 
+            --font-display: 'Bebas Neue', sans-serif; 
+            --font-body: 'Inter', sans-serif; 
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; }
         
@@ -33,14 +45,18 @@
         header h1 { font-family: var(--font-display); font-size: 3.2rem; letter-spacing: 2px; }
         header p { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
         
-        .screen { display: none; flex-direction: column; flex-grow: 1; justify-content: center; }
+        .screen { display: none; flex-direction: column; flex-grow: 1; justify-content: center; height: 100%; overflow: hidden; }
         .screen.active { display: flex; }
         
-        .modes-container { display: flex; flex-direction: column; gap: 15px; }
-        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 35px 20px; border-radius: 20px; text-align: center; cursor: pointer; }
+        .modes-container { display: flex; flex-direction: column; gap: 12px; }
+        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 25px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: transform 0.15s; }
         .mode-card:active { border-color: var(--accent-color); transform: scale(0.97); }
-        .mode-card h2 { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 1px; margin-bottom: 6px; }
-        .mode-card p { font-size: 0.9rem; color: #888; line-height: 1.4; }
+        .mode-card h2 { font-family: var(--font-display); font-size: 2.2rem; letter-spacing: 1px; margin-bottom: 4px; }
+        .mode-card p { font-size: 0.85rem; color: #888; line-height: 1.3; }
+
+        /* Botón de estadísticas en el menú principal */
+        .btn-stats-menu { background: #1a1a1a; border: 1px dashed #444; color: var(--accent-color); font-weight: 700; margin-top: 10px; padding: 18px; border-radius: 20px; font-family: var(--font-body); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-stats-menu:active { background: #222; }
 
         .selectors-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
         .picker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-color); padding: 5px 25px; border-radius: 20px; height: 130px; border: 1px solid #1f1f1f; }
@@ -48,7 +64,7 @@
         .wheel-container { position: relative; height: 120px; width: 140px; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
         .wheel-container::-webkit-scrollbar { display: none; }
         .wheel-space { height: 40px; }
-        .wheel-item { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--text-muted); scroll-snap-align: center; }
+        .wheel-item { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #444; scroll-snap-align: center; }
         .wheel-item.selected { color: var(--accent-color); font-weight: 700; font-size: 1.6rem; }
         
         .workout-ui { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
@@ -72,6 +88,27 @@
         .rocket-number { font-family: var(--font-display); font-size: 16rem; font-weight: 900; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
         @keyframes rocketPulse { 0% { opacity: 1; transform: scale(2.5); } 80% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(0.2); } }
         .launch-animation { animation: rocketPulse 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+        /* Estilos Pantalla de Estadísticas */
+        .stats-layout { display: flex; flex-direction: column; gap: 12px; height: calc(95vh - 140px); overflow-y: auto; padding-right: 2px; scrollbar-width: none; }
+        .stats-layout::-webkit-scrollbar { display: none; }
+        
+        .kpis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .kpi-card { background: var(--surface-color); padding: 12px 6px; border-radius: 15px; text-align: center; border: 1px solid #222; }
+        .kpi-value { font-family: var(--font-display); font-size: 1.8rem; color: var(--accent-color); }
+        .kpi-title { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 3px; font-weight: 700; }
+
+        .chart-card { background: var(--surface-color); border: 1px solid #222; border-radius: 20px; padding: 15px; height: 180px; position: relative; }
+
+        .history-list { background: var(--surface-color); border: 1px solid #222; border-radius: 20px; padding: 15px; max-height: 200px; overflow-y: auto; }
+        .history-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #eee; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-clear-history { font-size: 0.65rem; color: #ba1a1a; cursor: pointer; text-transform: uppercase; font-weight: bold; border: none; background: transparent; }
+        
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #222; font-size: 0.8rem; }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { color: #666; font-size: 0.75rem; }
+        .history-details { text-align: right; font-weight: 500; }
+        .history-empty { text-align: center; color: #555; padding: 20px 0; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -82,13 +119,19 @@
         <p id="sub-title">Elige modalidad</p>
     </header>
 
+    <!-- PANTALLA: MODALIDADES -->
     <div id="screen-modes" class="screen active">
         <div class="modes-container">
             <div class="mode-card" onclick="chooseMode('time')"><h2>MODO TIEMPO</h2><p>Entrenamiento clásico por intervalos.</p></div>
             <div class="mode-card" onclick="chooseMode('reps')"><h2>MODO REPETICIONES</h2><p>Haz las repes a tope y pulsa.</p></div>
+            <button class="btn-stats-menu" onclick="goToStats()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20V14"/></svg>
+                Ver Historial y Progreso
+            </button>
         </div>
     </div>
 
+    <!-- PANTALLA: CONFIGURACIÓN -->
     <div id="screen-setup" class="screen">
         <div class="selectors-list" id="selectors-render"></div>
         <div class="actions-wrapper">
@@ -99,6 +142,7 @@
         </div>
     </div>
 
+    <!-- PANTALLA: ENTRENAMIENTO -->
     <div id="screen-train" class="screen">
         <div class="workout-ui">
             <div id="workout-badge" class="badge work">TRABAJO</div>
@@ -115,6 +159,38 @@
             </div>
         </div>
     </div>
+
+    <!-- PANTALLA: ESTADÍSTICAS (NUEVA) -->
+    <div id="screen-stats" class="screen">
+        <div class="stats-layout">
+            <!-- KPIs Rápidos -->
+            <div class="kpis-grid">
+                <div class="kpi-card"><div class="kpi-value" id="kpi-total-workouts">0</div><div class="kpi-title">Entrenos</div></div>
+                <div class="kpi-card"><div class="kpi-value" id="kpi-total-series">0</div><div class="kpi-title">Series</div></div>
+                <div class="kpi-card"><div class="kpi-value" id="kpi-total-time">0m</div><div class="kpi-title">Invertido</div></div>
+            </div>
+
+            <!-- Caja de Gráfica -->
+            <div class="chart-card">
+                <canvas id="myStatsChart"></canvas>
+            </div>
+
+            <!-- Lista de Historial -->
+            <div class="history-list">
+                <div class="history-title">
+                    Historial Reciente 
+                    <button class="btn-clear-history" onclick="clearHistory()">Limpiar</button>
+                </div>
+                <div id="history-items-container">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions-wrapper" style="padding-bottom: 25px;">
+            <button class="btn" style="background:#222;color:#fff; width: 100%;" onclick="goTo('modes')">Volver al Inicio</button>
+        </div>
+    </div>
 </div>
 
 <div class="rocket-screen" id="rocket-screen"><div class="rocket-number" id="rocket-text">5</div></div>
@@ -122,7 +198,9 @@
 <script>
     var mode = 'time', settings = { time: 45, reps: 10, rest: 15, series: 3 }, runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
     var audioCtx = null, wakeLock = null;
+    var statsChart = null; // Instancia de Chart.js
 
+    // Gestión de WakeLock
     async function requestWakeLock() {
         if ('wakeLock' in navigator) {
             try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log(err); }
@@ -133,6 +211,7 @@
     }
     document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
 
+    // Audio Engine
     function sound(freq, duration) {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -155,7 +234,10 @@
     function goTo(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
-        if (id === 'modes') { document.getElementById('main-title').innerText = "GYM SPACE PRO"; document.getElementById('sub-title').innerText = "Elige modalidad"; }
+        if (id === 'modes') { 
+            document.getElementById('main-title').innerText = "GYM SPACE PRO"; 
+            document.getElementById('sub-title').innerText = "Elige modalidad"; 
+        }
     }
 
     function chooseMode(m) {
@@ -270,7 +352,146 @@
     }
     
     function forceQuit() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); }
-    function finishWorkout() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); setTimeout(() => { alert("🎯 ¡Entrenamiento completado!"); }, 150); }
+
+    // Guardado automático e Historial
+    function finishWorkout() { 
+        clearInterval(runtime.interval); 
+        releaseWakeLock(); 
+        
+        // Guardar el entreno en LocalStorage antes de volver al menú
+        saveWorkoutToStats();
+        
+        goTo('modes'); 
+        setTimeout(() => { alert("🎯 ¡Entrenamiento completado y guardado en tu progreso!"); }, 150); 
+    }
+
+    function saveWorkoutToStats() {
+        var workouts = JSON.parse(localStorage.getItem('gym_space_workouts')) || [];
+        
+        // Calcular tiempo estimado en segundos
+        var durationSec = 0;
+        if (mode === 'time') {
+            durationSec = (settings.time * settings.series) + (settings.rest * (settings.series - 1));
+        } else {
+            // Estima de 4 segs por repetición de promedio + descansos reales
+            durationSec = ((settings.reps * 4) * settings.series) + (settings.rest * (settings.series - 1));
+        }
+
+        var newRecord = {
+            date: new Date().toISOString(),
+            mode: mode,
+            series: settings.series,
+            value: mode === 'time' ? settings.time : settings.reps, // sg o reps
+            duration: Math.round(durationSec / 60) // en minutos
+        };
+
+        workouts.push(newRecord);
+        localStorage.setItem('gym_space_workouts', JSON.stringify(workouts));
+    }
+
+    function goToStats() {
+        document.getElementById('main-title').innerText = "ESTADÍSTICAS"; 
+        document.getElementById('sub-title').innerText = "Progreso del entrenamiento";
+        goTo('stats');
+        renderStats();
+    }
+
+    function renderStats() {
+        var workouts = JSON.parse(localStorage.getItem('gym_space_workouts')) || [];
+        var container = document.getElementById('history-items-container');
+        container.innerHTML = '';
+
+        // 1. Calcular KPIs
+        var totalWorkouts = workouts.length;
+        var totalSeries = workouts.reduce((acc, curr) => acc + curr.series, 0);
+        var totalMinutes = workouts.reduce((acc, curr) => acc + curr.duration, 0);
+
+        document.getElementById('kpi-total-workouts').innerText = totalWorkouts;
+        document.getElementById('kpi-total-series').innerText = totalSeries;
+        document.getElementById('kpi-total-time').innerText = totalMinutes + 'm';
+
+        // 2. Renderizar Historial (últimos 10)
+        if (workouts.length === 0) {
+            container.innerHTML = '<div class="history-empty">Ningún entrenamiento completado aún. ¡Empieza hoy!</div>';
+        } else {
+            var reversed = [...workouts].reverse().slice(0, 10);
+            reversed.forEach(w => {
+                var d = new Date(w.date);
+                var formattedDate = d.getDate() + '/' + (d.getMonth() + 1) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                var labelMode = w.mode === 'time' ? 'Tiempo' : 'Reps';
+                var unit = w.mode === 'time' ? 'sg' : ' r';
+                
+                var div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div>
+                        <div class="history-date">${formattedDate}</div>
+                        <strong style="color: ${w.mode === 'time' ? '#CCFF00' : '#0096ff'}">${w.mode.toUpperCase()}</strong>
+                    </div>
+                    <div class="history-details">
+                        ${w.series} x ${w.value}${unit}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 3. Crear Gráfica de Progreso de Series (Últimos 7 entrenamientos)
+        var chartData = workouts.slice(-7);
+        var labels = chartData.map(w => {
+            var d = new Date(w.date);
+            return d.getDate() + '/' + (d.getMonth() + 1);
+        });
+        var seriesData = chartData.map(w => w.series);
+
+        if (statsChart) {
+            statsChart.destroy(); // Destruir gráfica anterior para evitar bugs de pintado
+        }
+
+        var ctx = document.getElementById('myStatsChart').getContext('2d');
+        
+        // Configuración visual de la gráfica adaptada al modo oscuro de la app
+        statsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length > 0 ? labels : ['Sin Datos'],
+                datasets: [{
+                    label: 'Series por sesión',
+                    data: seriesData.length > 0 ? seriesData : [0],
+                    backgroundColor: '#CCFF00',
+                    borderColor: '#CCFF00',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    barThickness: 16
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#222' },
+                        ticks: { color: '#888', font: { family: 'Inter', size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#888', font: { family: 'Inter', size: 10 } }
+                    }
+                }
+            }
+        });
+    }
+
+    function clearHistory() {
+        if (confirm("¿Estás seguro de que deseas borrar todo tu historial de entrenamientos?")) {
+            localStorage.removeItem('gym_space_workouts');
+            renderStats();
+        }
+    }
 </script>
 </body>
 </html>
