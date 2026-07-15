@@ -2,649 +2,91 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Timer V3.1</title>
-    
-    <link rel="manifest" href="./manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 text-anchor=%22middle%22>GYM</text></svg>">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Carga CAFYD</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap');
-        
-        :root {
-            --bg-color: #0d0d0d;
-            --card-bg: #161616;
-            --accent-color: #CCFF00;
-            --rest-color: #0096ff;
-            --text-main: #ffffff;
-            --text-muted: #8e8e93;
-            --accent-glow: rgba(204, 255, 0, 0.15);
-            --rest-glow: rgba(0, 150, 255, 0.15);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: background-color 0.5s ease;
-        }
-
-        body.phase-rest {
-            background-color: #001220;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 20px 20px calc(20px + env(safe-area-inset-bottom)) 20px;
-            position: relative;
-        }
-
-        .screen {
-            display: none;
-            flex-direction: column;
-            flex-grow: 1;
-            height: 100%;
-            justify-content: space-between;
-        }
-
-        .screen.active {
-            display: flex;
-        }
-
-        .screen-header {
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .screen-header h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 3.2rem;
-            letter-spacing: 2px;
-            color: var(--text-main);
-        }
-
-        .screen-header p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- PANTALLA DE INICIO (ESTILO GYM V3.0) --- */
-        .modes-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin: auto 0;
-        }
-
-        .mode-card {
-            background: var(--card-bg);
-            border: 2px solid #222;
-            padding: 24px;
-            border-radius: 24px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .mode-card:active {
-            transform: scale(0.97);
-            border-color: var(--accent-color);
-        }
-
-        .mode-card h2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.2rem;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .mode-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        .chart-container {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 16px;
-            margin-top: 15px;
-            border: 1px solid #222;
-        }
-
-        /* --- CONTROLES DESLIZANTES --- */
-        .setup-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            margin: auto 0;
-        }
-
-        .control-group {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #222;
-        }
-
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 800;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-        }
-
-        .control-label span:last-child {
-            color: var(--accent-color);
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.5rem;
-        }
-
-        .slider-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 10px;
-            border-radius: 5px;
-            background: #2c2c2e;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(204, 255, 0, 0.4);
-            transition: transform 0.1s;
-        }
-
-        /* --- PANTALLA ENTRENAMIENTO (MÁXIMA VISIBILIDAD SIN SOLAPAR) --- */
-        .train-status-panel {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .badge {
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-weight: 800;
-            border: 1.5px solid var(--accent-color);
-            color: var(--accent-color);
-            display: inline-block;
-        }
-
-        body.phase-rest .badge {
-            border-color: var(--rest-color);
-            color: var(--rest-color);
-        }
-
-        /* Números al tamaño grande perfecto (se adaptan sin tocar los bordes) */
-        .timer-number {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 22vh; 
-            font-weight: 900;
-            line-height: 0.85;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
-        }
-
-        body.phase-rest .timer-number {
-            color: var(--rest-color);
-        }
-
-        /* El botón de impacto con la estructura original */
-        .giant-action-zone {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 32px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px solid #222;
-            margin: 10px 0 20px 0;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            min-height: 150px;
-        }
-
-        .giant-action-zone:active {
-            background: var(--accent-glow);
-            border-color: var(--accent-color);
-            transform: scale(0.97);
-        }
-
-        body.phase-rest .giant-action-zone:active {
-            background: var(--rest-glow);
-            border-color: var(--rest-color);
-        }
-
-        .giant-action-text {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            color: #555;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .giant-action-subtext {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #444;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 8px;
-        }
-
-        .giant-action-zone:active .giant-action-text { color: var(--accent-color); }
-        .giant-action-zone:active .giant-action-subtext { color: var(--text-main); }
-
-        .btn {
-            width: 100%;
-            padding: 20px;
-            border-radius: 20px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-        }
-
-        .btn-primary { background: var(--accent-color); color: #000; }
-        .btn-secondary { background: #1c1c1e; color: #ff3b30; border: 1px solid #2c2c2e; padding: 16px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f9; display: flex; flex-direction: column; align-items: center; padding: 20px; color: #333; }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: #2c3e50; color: #ffffff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #34495e; }
+        canvas { margin-top: 30px; width: 100% !important; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-
-    <!-- 1. PANTALLA PRINCIPAL: ESTILO GYM ORIGINAL -->
-    <div id="screen-modes" class="screen active">
-        <div class="screen-header">
-            <h1>GYM WORKOUT</h1>
-            <p>Temporizador de Intervalos V3.1</p>
-        </div>
-
-        <div class="modes-list">
-            <div class="mode-card" onclick="chooseMode('time')">
-                <h2>MODO TIEMPO</h2>
-                <p>Configura intervalos de trabajo y descanso automáticos.</p>
-            </div>
-            <div class="mode-card" onclick="chooseMode('reps')">
-                <h2>MODO REPETICIONES</h2>
-                <p>Realiza tus repeticiones y salta al descanso manualmente.</p>
-            </div>
-        </div>
-
-        <!-- Gráfica interactiva real basada en entrenamientos completados -->
-        <div class="chart-container">
-            <p id="chart-title" style="font-size:0.75rem; text-transform:uppercase; font-weight:800; letter-spacing:1px; color:var(--text-muted); margin-bottom:8px; text-align:center;">Tus Sesiones esta semana</p>
-            <canvas id="history-chart" style="max-height: 110px; width:100%;"></canvas>
-        </div>
+<div class="container">
+    <h2>Registro de Carga</h2>
+    
+    <div class="input-group">
+        <input type="number" id="sets" placeholder="Series">
+        <input type="number" id="reps" placeholder="Reps">
     </div>
+    
+    <button id="btnRegistrar">REGISTRAR SESIÓN</button>
 
-    <!-- 2. PANTALLA DE AJUSTES -->
-    <div id="screen-setup" class="screen">
-        <div class="screen-header">
-            <h1 id="setup-title">AJUSTES</h1>
-            <p>Configura tus series</p>
-        </div>
-
-        <div class="setup-controls" id="selectors-render"></div>
-
-        <div style="padding-bottom:10px;">
-            <button class="btn btn-primary" onclick="triggerRocketLaunch()">EMPEZAR ENTRENAMIENTO ⚡</button>
-            <button class="btn btn-secondary" style="margin-top: 10px; color: var(--text-muted);" onclick="goBackToModes()">VOLVER</button>
-        </div>
-    </div>
-
-    <!-- 3. PANTALLA DE ENTRENAMIENTO -->
-    <div id="screen-train" class="screen">
-        <div class="train-status-panel">
-            <div id="workout-badge" class="badge">TRABAJO</div>
-            <div id="workout-timer" class="timer-number">00</div>
-            <div id="series-counter" style="font-size: 0.95rem; font-weight:700; color:var(--text-muted); letter-spacing:1px;">SERIE 1 DE 4</div>
-        </div>
-
-        <div id="giant-btn" class="giant-action-zone" onclick="nextSegmentReps()">
-            <div id="giant-btn-text" class="giant-action-text">PULSA AL ACABAR</div>
-            <div id="giant-btn-subtext" class="giant-action-subtext">Siguiente Serie</div>
-        </div>
-
-        <div style="padding-bottom:10px;">
-            <button class="btn btn-secondary" onclick="forceQuit()">DETENER</button>
-        </div>
-    </div>
-
+    <canvas id="progresoChart"></canvas>
 </div>
 
 <script>
-    var settings = { time: 45, rest: 30, series: 4, reps: 10 };
-    var mode = 'time';
-    var runtime = { currentSeries: 1, currentPhase: 'work', secondsLeft: 0, interval: null, audioCtx: null };
-    var chartInstance = null;
+    const btn = document.getElementById('btnRegistrar');
+    let chart;
 
-    document.addEventListener("DOMContentLoaded", () => {
-        renderChart();
-    });
-
-    // --- GRÁFICA INTERACTIVA REAL CON LOCALSTORAGE ---
-    function getWorkoutHistory() {
-        let history = localStorage.getItem('gym_workout_history_v3');
-        if (!history) {
-            // Inicializar datos vacíos reales si no existen
-            history = JSON.stringify({ 'Lun': 0, 'Mar': 0, 'Mié': 0, 'Jue': 0, 'Vie': 0, 'Sáb': 0, 'Dom': 0 });
-            localStorage.setItem('gym_workout_history_v3', history);
-        }
-        return JSON.parse(history);
+    function cargarDatos() {
+        return JSON.parse(localStorage.getItem('entrenos')) || [];
     }
 
-    function recordCompletedWorkout() {
-        let history = getWorkoutHistory();
-        const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-        let todayName = days[new Date().getDay()];
-        
-        history[todayName] = (history[todayName] || 0) + 1;
-        localStorage.setItem('gym_workout_history_v3', JSON.stringify(history));
-        
-        // Actualizar la gráfica al momento
-        renderChart();
+    function guardarDato(volumen) {
+        const datos = cargarDatos();
+        datos.push({
+            fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
+            volumen: volumen
+        });
+        localStorage.setItem('entrenos', JSON.stringify(datos));
+        renderizarGrafica();
     }
 
-    function renderChart() {
-        const ctx = document.getElementById('history-chart').getContext('2d');
-        const historyData = getWorkoutHistory();
-        const labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-        const dataValues = labels.map(day => historyData[day] || 0);
+    function renderizarGrafica() {
+        const datos = cargarDatos();
+        const ctx = document.getElementById('progresoChart').getContext('2d');
+        
+        if (chart) chart.destroy();
 
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
-
-        chartInstance = new Chart(ctx, {
+        chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: datos.map(d => d.fecha),
                 datasets: [{
-                    label: 'Sesiones',
-                    data: dataValues,
-                    borderColor: '#CCFF00',
-                    backgroundColor: 'rgba(204, 255, 0, 0.05)',
-                    borderWidth: 2,
+                    label: 'Volumen Total (Sets x Reps)',
+                    data: datos.map(d => d.volumen),
+                    borderColor: '#2c3e50',
+                    tension: 0.3,
                     fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#CCFF00'
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)'
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#8e8e93', font: { size: 10 } } },
-                    y: { 
-                        grid: { color: '#222' }, 
-                        ticks: { 
-                            color: '#8e8e93', 
-                            font: { size: 10 }, 
-                            stepSize: 1,
-                            precision: 0
-                        } 
-                    }
-                }
-            }
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
         });
     }
 
-    // --- FLUJO DE LA APLICACIÓN ---
-    function chooseMode(selectedMode) {
-        mode = selectedMode;
-        document.getElementById('screen-modes').classList.remove('active');
-        document.getElementById('screen-setup').classList.add('active');
-        document.getElementById('setup-title').innerText = mode === 'time' ? 'MODO TIEMPO' : 'MODO REPETICIONES';
-        renderSelectors();
-    }
-
-    function goBackToModes() {
-        document.getElementById('screen-setup').classList.remove('active');
-        document.getElementById('screen-modes').classList.add('active');
-    }
-
-    function renderSelectors() {
-        const container = document.getElementById('selectors-render');
-        if (mode === 'time') {
-            container.innerHTML = `
-                <div class="control-group">
-                    <div class="control-label"><span>Trabajo</span><span id="val-time">${settings.time}s</span></div>
-                    <div class="slider-wrapper">
-                        <input type="range" min="5" max="120" step="5" value="${settings.time}" oninput="settings.time=parseInt(this.value); document.getElementById('val-time').innerText=this.value+'s'">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Descanso</span><span id="val-rest">${settings.rest}s</span></div>
-                    <div class="slider-wrapper">
-                        <input type="range" min="5" max="120" step="5" value="${settings.rest}" oninput="settings.rest=parseInt(this.value); document.getElementById('val-rest').innerText=this.value+'s'">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Series</span><span id="val-series">${settings.series}</span></div>
-                    <div class="slider-wrapper">
-                        <input type="range" min="1" max="15" step="1" value="${settings.series}" oninput="settings.series=parseInt(this.value); document.getElementById('val-series').innerText=this.value">
-                    </div>
-                </div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div class="control-group">
-                    <div class="control-label"><span>Repeticiones</span><span id="val-reps">${settings.reps}</span></div>
-                    <div class="slider-wrapper">
-                        <input type="range" min="5" max="50" step="5" value="${settings.reps}" oninput="settings.reps=parseInt(this.value); document.getElementById('val-reps').innerText=this.value">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Descanso</span><span id="val-rest">${settings.rest}s</span></div>
-                    <div class="slider-wrapper">
-                        <input type="range" min="5" max="120" step="5" value="${settings.rest}" oninput="settings.rest=parseInt(this.value); document.getElementById('val-rest').innerText=this.value+'s'">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Series</span><span id="val-series">${settings.series}</span></div>
-                    <div class="slider-wrapper">
-                        <input type="range" min="1" max="15" step="1" value="${settings.series}" oninput="settings.series=parseInt(this.value); document.getElementById('val-series').innerText=this.value">
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    function triggerRocketLaunch() {
-        document.getElementById('screen-setup').classList.remove('active');
-        document.getElementById('screen-train').classList.add('active');
+    btn.addEventListener('click', () => {
+        const sets = parseInt(document.getElementById('sets').value);
+        const reps = parseInt(document.getElementById('reps').value);
         
-        runtime.currentSeries = 1;
-        setPhase('work');
-        
-        if (mode === 'time') {
-            document.getElementById('giant-btn').style.opacity = "0.3";
-            document.getElementById('giant-btn').style.pointerEvents = "none";
-            document.getElementById('giant-btn-text').innerHTML = "AUTOMÁTICO";
-            document.getElementById('giant-btn-subtext').innerText = "CONCENTRACIÓN TOTAL";
-            runTimer(settings.time);
+        if (sets && reps) {
+            guardarDato(sets * reps);
+            document.getElementById('sets').value = '';
+            document.getElementById('reps').value = '';
         } else {
-            document.getElementById('giant-btn').style.opacity = "1";
-            document.getElementById('giant-btn').style.pointerEvents = "auto";
-            document.getElementById('workout-timer').innerText = settings.reps;
-            document.getElementById('giant-btn-text').innerHTML = "PULSA AL TERMINAR";
-            document.getElementById('giant-btn-subtext').innerText = "REGISTRA TU SERIE";
+            alert("Por favor, introduce series y repeticiones.");
         }
-    }
+    });
 
-    function setPhase(phase) {
-        runtime.currentPhase = phase;
-        document.getElementById('series-counter').innerText = `SERIE ${runtime.currentSeries} DE ${settings.series}`;
-        
-        if (phase === 'work') {
-            document.body.classList.remove('phase-rest');
-            document.getElementById('workout-badge').innerText = "TRABAJO";
-            document.getElementById('workout-badge').style.borderColor = "var(--accent-color)";
-            document.getElementById('workout-badge').style.color = "var(--accent-color)";
-        } else {
-            document.body.classList.add('phase-rest');
-            document.getElementById('workout-badge').innerText = "DESCANSO";
-            document.getElementById('workout-badge').style.borderColor = "var(--rest-color)";
-            document.getElementById('workout-badge').style.color = "var(--rest-color)";
-        }
-    }
-
-    function runTimer(seconds) {
-        runtime.secondsLeft = seconds;
-        updateTimerDisplay();
-        playBeep('start');
-
-        clearInterval(runtime.interval);
-        runtime.interval = setInterval(() => {
-            runtime.secondsLeft--;
-            updateTimerDisplay();
-
-            // Cuenta atrás sonora en los 5 segundos finales exactos
-            if (runtime.secondsLeft <= 5 && runtime.secondsLeft > 0) {
-                playBeep('tick');
-            }
-
-            if (runtime.secondsLeft <= 0) {
-                clearInterval(runtime.interval);
-                playBeep('end');
-                
-                if (runtime.currentPhase === 'work') {
-                    executeRest();
-                } else {
-                    executeWork();
-                }
-            }
-        }, 1000);
-    }
-
-    function updateTimerDisplay() {
-        document.getElementById('workout-timer').innerText = runtime.secondsLeft;
-    }
-
-    function executeRest() {
-        setPhase('rest');
-        document.getElementById('giant-btn').style.opacity = "0.3";
-        document.getElementById('giant-btn').style.pointerEvents = "none";
-        document.getElementById('giant-btn-text').innerHTML = "RECUPERA";
-        document.getElementById('giant-btn-subtext').innerText = "RESPIRA PROFUNDO";
-        runTimer(settings.rest);
-    }
-
-    function executeWork() {
-        runtime.currentSeries++;
-        if (runtime.currentSeries > settings.series) {
-            recordCompletedWorkout(); // REGISTRO REAL EN LA GRÁFICA
-            alert("💪 ¡Excelente! Entrenamiento guardado y completado.");
-            forceQuit();
-        } else {
-            setPhase('work');
-            if (mode === 'time') {
-                runTimer(settings.time);
-            } else {
-                document.getElementById('workout-timer').innerText = settings.reps;
-                document.getElementById('giant-btn').style.opacity = "1";
-                document.getElementById('giant-btn').style.pointerEvents = "auto";
-                document.getElementById('giant-btn-text').innerHTML = "PULSA AL TERMINAR";
-                document.getElementById('giant-btn-subtext').innerText = "REGISTRA TU SERIE";
-            }
-        }
-    }
-
-    function nextSegmentReps() {
-        if (mode === 'reps' && runtime.currentPhase === 'work') {
-            executeRest();
-        }
-    }
-
-    function forceQuit() {
-        clearInterval(runtime.interval);
-        document.getElementById('screen-train').classList.remove('active');
-        document.getElementById('screen-modes').classList.add('active');
-        document.body.classList.remove('phase-rest');
-    }
-
-    function playBeep(type) {
-        try {
-            if (!runtime.audioCtx) {
-                runtime.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (runtime.audioCtx.state === 'suspended') {
-                runtime.audioCtx.resume();
-            }
-
-            const osc = runtime.audioCtx.createOscillator();
-            const gainNode = runtime.audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(runtime.audioCtx.destination);
-
-            if (type === 'tick') {
-                osc.frequency.setValueAtTime(600, runtime.audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.08, runtime.audioCtx.currentTime);
-                osc.start();
-                osc.stop(runtime.audioCtx.currentTime + 0.08);
-            } else if (type === 'start') {
-                osc.frequency.setValueAtTime(880, runtime.audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.15, runtime.audioCtx.currentTime);
-                osc.start();
-                osc.stop(runtime.audioCtx.currentTime + 0.25);
-            } else if (type === 'end') {
-                osc.frequency.setValueAtTime(440, runtime.audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.15, runtime.audioCtx.currentTime);
-                osc.start();
-                osc.stop(runtime.audioCtx.currentTime + 0.4);
-            }
-        } catch (e) {
-            console.log("Audio temporalmente bloqueado", e);
-        }
-    }
+    renderizarGrafica();
 </script>
+
 </body>
 </html>
