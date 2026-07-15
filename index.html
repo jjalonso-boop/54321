@@ -3,494 +3,664 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gym Space Pro v2.0</title>
+    <title>Gym Space Pro v3.0</title>
     
+    <!-- PWA & Mobile Optimization -->
     <link rel="manifest" href="./manifest.json">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link class="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d0d0d%22/><text x=%2250%22 y=%2261%22 font-family=%22system-ui, -apple-system, sans-serif%22 font-size=%2225%22 font-weight=%22900%22 fill=%22%23ffffff%22 letter-spacing=%22-1.2%22 text-anchor=%22middle%22>54321</text></svg>">
-
-    <!-- Librería Chart.js cargada de forma ultraligera para las gráficas -->
+    
+    <!-- Chart.js para el gráfico de barras -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js').catch(function(err) { console.log('SW error', err); });
-            });
-        }
-    </script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght=400;500;700&display=swap');
-        :root { 
-            --bg-color: #0d0d0d; 
-            --surface-color: #161616; 
-            --accent-color: #CCFF00; 
-            --rest-color: #0096ff; 
-            --text-main: #ffffff; 
-            --text-muted: #888888; 
-            --font-display: 'Bebas Neue', sans-serif; 
-            --font-body: 'Inter', sans-serif; 
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;700&display=swap');
+        
+        :root {
+            --bg-color: #0d0d0d;
+            --surface-color: #161616;
+            --accent-color: #CCFF00;
+            --rest-color: #0096ff;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-body: 'Inter', sans-serif;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; }
-        
-        .app-container { width: 100%; max-width: 390px; height: 95vh; display: flex; flex-direction: column; justify-content: space-between; }
 
-        header { text-align: center; margin-bottom: 5px; }
-        header h1 { font-family: var(--font-display); font-size: 3.2rem; letter-spacing: 2px; }
-        header p { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .screen { display: none; flex-direction: column; flex-grow: 1; justify-content: center; height: 100%; overflow: hidden; }
-        .screen.active { display: flex; }
-        
-        .modes-container { display: flex; flex-direction: column; gap: 12px; }
-        .mode-card { background: var(--surface-color); border: 1px solid #222; padding: 25px 20px; border-radius: 20px; text-align: center; cursor: pointer; transition: transform 0.15s; }
-        .mode-card:active { border-color: var(--accent-color); transform: scale(0.97); }
-        .mode-card h2 { font-family: var(--font-display); font-size: 2.2rem; letter-spacing: 1px; margin-bottom: 4px; }
-        .mode-card p { font-size: 0.85rem; color: #888; line-height: 1.3; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        /* Botón de estadísticas en el menú principal */
-        .btn-stats-menu { background: #1a1a1a; border: 1px dashed #444; color: var(--accent-color); font-weight: 700; margin-top: 10px; padding: 18px; border-radius: 20px; font-family: var(--font-body); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-stats-menu:active { background: #222; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
 
-        .selectors-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
-        .picker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-color); padding: 5px 25px; border-radius: 20px; height: 130px; border: 1px solid #1f1f1f; }
-        .picker-label { font-size: 0.95rem; font-weight: 700; color: #eee; max-width: 45%; line-height: 1.2; }
-        .wheel-container { position: relative; height: 120px; width: 140px; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
-        .wheel-container::-webkit-scrollbar { display: none; }
-        .wheel-space { height: 40px; }
-        .wheel-item { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #444; scroll-snap-align: center; }
-        .wheel-item.selected { color: var(--accent-color); font-weight: 700; font-size: 1.6rem; }
-        
-        .workout-ui { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
-        .badge { font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; padding: 8px 24px; border-radius: 20px; margin-bottom: 5px; font-weight: bold; }
+        .app-container {
+            width: 100%;
+            max-width: 390px;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Tarjetas de Modo */
+        .mode-card {
+            background: var(--surface-color);
+            border: 1px solid #222;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: transform 0.1s ease, border-color 0.2s;
+        }
+        .mode-card:active { transform: scale(0.98); }
+        .mode-card h2 { font-family: var(--font-display); font-size: 2.2rem; margin-bottom: 5px; }
+        .mode-card p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Selector de Configuración */
+        .setup-group {
+            margin-bottom: 25px;
+        }
+        .setup-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .setup-label span { color: var(--text-main); font-size: 1.2rem; }
+        .slider-control {
+            width: 100%;
+            -webkit-appearance: none;
+            background: #222;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+        .slider-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* Botones de Control por voz (Interruptor) */
+        .btn-voice {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            font-weight: 700;
+            margin-top: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        .btn-voice.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(204, 255, 0, 0.05);
+        }
+        .voice-mic-dot {
+            width: 8px;
+            height: 8px;
+            background: #444;
+            border-radius: 50%;
+        }
+        .btn-voice.active .voice-mic-dot {
+            background: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-color);
+            animation: pulse-mic 1.5s infinite;
+        }
+        @keyframes pulse-mic {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        #voice-indicator {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            height: 20px;
+            display: none;
+        }
+
+        /* Pantalla de Entrenamiento */
+        .badge {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 8px 24px;
+            border-radius: 20px;
+            margin: 0 auto 15px auto;
+            font-weight: 800;
+            display: inline-block;
+            text-align: center;
+        }
         .badge.work { background: rgba(204, 255, 0, 0.15); color: var(--accent-color); border: 1px solid var(--accent-color); }
         .badge.rest { background: rgba(0, 150, 255, 0.15); color: var(--rest-color); border: 1px solid var(--rest-color); }
         
-        .timer-number { font-family: var(--font-display); font-size: 15rem; font-weight: 900; line-height: 0.85; letter-spacing: -4px; margin: 10px 0; }
-        .timer-number.triple-digit { font-size: 9.5rem; letter-spacing: -2px; }
-        
-        .panels { display: flex; gap: 60px; margin-top: 5px; margin-bottom: 15px; }
-        .panel-data { font-size: 2.2rem; font-weight: bold; }
-        .panel-data span { display: block; font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-        
-        .actions-wrapper { padding-bottom: 55px; width: 100%; }
-        .actions { display: flex; gap: 15px; width: 100%; }
-        
-        .btn { flex: 1; padding: 22px; border-radius: 18px; border: none; font-family: var(--font-body); font-weight: 700; font-size: 1.2rem; cursor: pointer; }
-        
-        .rocket-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(13,13,13,0.98); display: none; align-items: center; justify-content: center; z-index: 999; }
-        .rocket-number { font-family: var(--font-display); font-size: 16rem; font-weight: 900; color: var(--accent-color); opacity: 0; transform: scale(2.5); }
-        @keyframes rocketPulse { 0% { opacity: 1; transform: scale(2.5); } 80% { opacity: 0.8; transform: scale(0.6); } 100% { opacity: 0; transform: scale(0.2); } }
-        .launch-animation { animation: rocketPulse 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .timer-number {
+            font-family: var(--font-display);
+            font-size: 11rem;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .series-counter {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+        .series-counter span { color: var(--text-main); font-weight: 700; }
 
-        /* Estilos Pantalla de Estadísticas */
-        .stats-layout { display: flex; flex-direction: column; gap: 12px; height: calc(95vh - 140px); overflow-y: auto; padding-right: 2px; scrollbar-width: none; }
-        .stats-layout::-webkit-scrollbar { display: none; }
-        
-        .kpis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .kpi-card { background: var(--surface-color); padding: 12px 6px; border-radius: 15px; text-align: center; border: 1px solid #222; }
-        .kpi-value { font-family: var(--font-display); font-size: 1.8rem; color: var(--accent-color); }
-        .kpi-title { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 3px; font-weight: 700; }
+        /* Sección de Gráficos e Historial */
+        .history-section {
+            background: var(--surface-color);
+            border: 1px solid #222;
+            padding: 15px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        .history-section h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
 
-        .chart-card { background: var(--surface-color); border: 1px solid #222; border-radius: 20px; padding: 15px; height: 180px; position: relative; }
-
-        .history-list { background: var(--surface-color); border: 1px solid #222; border-radius: 20px; padding: 15px; max-height: 200px; overflow-y: auto; }
-        .history-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #eee; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-clear-history { font-size: 0.65rem; color: #ba1a1a; cursor: pointer; text-transform: uppercase; font-weight: bold; border: none; background: transparent; }
-        
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #222; font-size: 0.8rem; }
-        .history-item:last-child { border-bottom: none; }
-        .history-date { color: #666; font-size: 0.75rem; }
-        .history-details { text-align: right; font-weight: 500; }
-        .history-empty { text-align: center; color: #555; padding: 20px 0; font-size: 0.85rem; }
+        /* Botones Genéricos */
+        .btn {
+            padding: 22px;
+            border-radius: 18px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.1s ease;
+        }
+        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
-<div class="app-container" id="app-viewport">
+<div class="app-container">
     <header>
-        <h1 id="main-title">GYM SPACE PRO</h1>
-        <p id="sub-title">Elige modalidad</p>
+        <h1>GYM SPACE PRO</h1>
     </header>
 
-    <!-- PANTALLA: MODALIDADES -->
+    <!-- PANTALLA 1: MODOS -->
     <div id="screen-modes" class="screen active">
-        <div class="modes-container">
-            <div class="mode-card" onclick="chooseMode('time')"><h2>MODO TIEMPO</h2><p>Entrenamiento clásico por intervalos.</p></div>
-            <div class="mode-card" onclick="chooseMode('reps')"><h2>MODO REPETICIONES</h2><p>Haz las repes a tope y pulsa.</p></div>
-            <button class="btn-stats-menu" onclick="goToStats()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20V14"/></svg>
-                Ver Historial y Progreso
-            </button>
+        <div class="mode-card" onclick="chooseMode('time')">
+            <h2>MODO TIEMPO</h2>
+            <p>Trabajas por tiempo (p.ej. planchas, HIIT)</p>
+        </div>
+        <div class="mode-card" onclick="chooseMode('reps')">
+            <h2>MODO REPETICIONES</h2>
+            <p>Haces tus repeticiones y marcas al acabar (Fuerza)</p>
+        </div>
+
+        <!-- El interruptor de control por voz -->
+        <button id="toggle-voice" class="btn-voice" onclick="toggleVoice()">
+            <div class="voice-mic-dot"></div>
+            <span>CONTROL POR VOZ: DESACTIVADO</span>
+        </button>
+
+        <!-- Sección de estadísticas en local -->
+        <div class="history-section">
+            <h3>TUS ÚLTIMAS SESIONES</h3>
+            <canvas id="history-chart" style="max-height: 120px; width: 100%;"></canvas>
         </div>
     </div>
 
-    <!-- PANTALLA: CONFIGURACIÓN -->
+    <!-- PANTALLA 2: CONFIGURACIÓN -->
     <div id="screen-setup" class="screen">
-        <div class="selectors-list" id="selectors-render"></div>
-        <div class="actions-wrapper">
-            <div class="actions">
-                <button class="btn" style="background:#222;color:#fff;" onclick="goTo('modes')">Atrás</button>
-                <button class="btn" style="background:#CCFF00;color:#000;" onclick="triggerRocketLaunch()">IGNICIÓN 🚀</button>
-            </div>
-        </div>
+        <div id="selectors-render"></div>
+        <button class="btn" style="background: var(--accent-color); color: #000;" onclick="triggerRocketLaunch()">IGNICIÓN</button>
     </div>
 
-    <!-- PANTALLA: ENTRENAMIENTO -->
-    <div id="screen-train" class="screen">
-        <div class="workout-ui">
-            <div id="workout-badge" class="badge work">TRABAJO</div>
-            <div id="workout-timer" class="timer-number">00</div>
-            <div class="panels">
-                <div class="panel-data"><div id="p-series">1/3</div><span>Series</span></div>
-                <div class="panel-data" id="p-reps-box"><div id="p-reps">10</div><span>Reps</span></div>
-            </div>
-        </div>
-        <div class="actions-wrapper">
-            <div class="actions">
-                <button class="btn" id="btn-done-reps" onclick="nextSegmentReps()" style="display:none; background:#fff;color:#000;font-size:1.4rem;">¡HECHO!</button>
-                <button class="btn" style="background:#ba1a1a;color:#fff;" onclick="forceQuit()">PARAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PANTALLA: ESTADÍSTICAS (NUEVA) -->
-    <div id="screen-stats" class="screen">
-        <div class="stats-layout">
-            <!-- KPIs Rápidos -->
-            <div class="kpis-grid">
-                <div class="kpi-card"><div class="kpi-value" id="kpi-total-workouts">0</div><div class="kpi-title">Entrenos</div></div>
-                <div class="kpi-card"><div class="kpi-value" id="kpi-total-series">0</div><div class="kpi-title">Series</div></div>
-                <div class="kpi-card"><div class="kpi-value" id="kpi-total-time">0m</div><div class="kpi-title">Invertido</div></div>
-            </div>
-
-            <!-- Caja de Gráfica -->
-            <div class="chart-card">
-                <canvas id="myStatsChart"></canvas>
-            </div>
-
-            <!-- Lista de Historial -->
-            <div class="history-list">
-                <div class="history-title">
-                    Historial Reciente 
-                    <button class="btn-clear-history" onclick="clearHistory()">Limpiar</button>
-                </div>
-                <div id="history-items-container">
-                    <!-- Dinámico -->
-                </div>
-            </div>
-        </div>
-        
-        <div class="actions-wrapper" style="padding-bottom: 25px;">
-            <button class="btn" style="background:#222;color:#fff; width: 100%;" onclick="goTo('modes')">Volver al Inicio</button>
-        </div>
+    <!-- PANTALLA 3: ENTRENAMIENTO -->
+    <div id="screen-train" class="screen" style="text-align: center;">
+        <div id="voice-indicator">🎤 ESCUCHANDO... di "HECHO" o "PARAR"</div>
+        <div id="workout-badge" class="badge work">TRABAJO</div>
+        <div id="workout-timer" class="timer-number">00</div>
+        <div id="series-counter" class="series-counter">SERIE <span>1 de 3</span></div>
+        <button id="main-train-btn" class="btn" style="background: var(--accent-color); color: #000; margin-bottom: 12px;" onclick="nextSegmentReps()">SIGUIENTE</button>
+        <button class="btn" style="background: #1a1a1a; color: #ba1a1a; border: 1px solid #333;" onclick="forceQuit()">PARAR</button>
     </div>
 </div>
 
-<div class="rocket-screen" id="rocket-screen"><div class="rocket-number" id="rocket-text">5</div></div>
-
 <script>
-    var mode = 'time', settings = { time: 45, reps: 10, rest: 15, series: 3 }, runtime = { seriesLeft: 0, currentPhase: 'work', interval: null, seconds: 0 };
-    var audioCtx = null, wakeLock = null;
-    var statsChart = null; // Instancia de Chart.js
+    // --- ESTADO GLOBAL & CONFIGURACIÓN ---
+    var isVoiceEnabled = false;
+    var recognition = null;
+    var mode = 'time'; // 'time' o 'reps'
+    var settings = {
+        time: 45,
+        reps: 10,
+        rest: 30,
+        series: 4
+    };
+    var runtime = {
+        currentSeries: 1,
+        currentPhase: 'work', // 'work' o 'rest'
+        secondsLeft: 0,
+        interval: null,
+        audioCtx: null
+    };
 
-    // Gestión de WakeLock
-    async function requestWakeLock() {
-        if ('wakeLock' in navigator) {
-            try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log(err); }
+    // --- INDEXEDDB (BASE DE DATOS LOCAL Y SEGURA) ---
+    var db;
+    var request = indexedDB.open("GymSpaceDB", 1);
+    request.onupgradeneeded = function(e) {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains("workouts")) {
+            db.createObjectStore("workouts", { keyPath: "id", autoIncrement: true });
+        }
+    };
+    request.onsuccess = function(e) {
+        db = e.target.result;
+        renderHistoryChart();
+    };
+
+    // --- AUDIOS SIN ARCHIVOS (Sintetizador Web para no usar MP3s) ---
+    function playBeep(type) {
+        if (!runtime.audioCtx) {
+            runtime.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        var osc = runtime.audioCtx.createOscillator();
+        var gain = runtime.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(runtime.audioCtx.destination);
+
+        if (type === 'start') {
+            // Pitido doble motivador
+            osc.frequency.setValueAtTime(880, runtime.audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, runtime.audioCtx.currentTime);
+            osc.start();
+            osc.stop(runtime.audioCtx.currentTime + 0.15);
+            
+            setTimeout(() => {
+                var osc2 = runtime.audioCtx.createOscillator();
+                var gain2 = runtime.audioCtx.createGain();
+                osc2.connect(gain2);
+                gain2.connect(runtime.audioCtx.destination);
+                osc2.frequency.setValueAtTime(1200, runtime.audioCtx.currentTime);
+                gain2.gain.setValueAtTime(0.1, runtime.audioCtx.currentTime);
+                osc2.start();
+                osc2.stop(runtime.audioCtx.currentTime + 0.35);
+            }, 180);
+        } else if (type === 'end') {
+            // Pitido grave de parada
+            osc.frequency.setValueAtTime(330, runtime.audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, runtime.audioCtx.currentTime);
+            osc.start();
+            osc.stop(runtime.audioCtx.currentTime + 0.6);
+        } else {
+            // Pitido corto estándar (cuenta atrás)
+            osc.frequency.setValueAtTime(440, runtime.audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, runtime.audioCtx.currentTime);
+            osc.start();
+            osc.stop(runtime.audioCtx.currentTime + 0.1);
         }
     }
-    function releaseWakeLock() {
-        if (wakeLock) { wakeLock.release().then(() => wakeLock = null); }
-    }
-    document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
 
-    // Audio Engine
-    function sound(freq, duration) {
-        try {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.type = 'triangle'; osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); setTimeout(() => { osc.stop(); osc.disconnect(); }, duration);
-        } catch(e) {}
-    }
-
-    function playTripleBeepRest() {
-        sound(850, 80);
-        setTimeout(() => sound(850, 80), 280);
-        setTimeout(() => sound(850, 120), 560);
-    }
-    function playLongBeepWork() { sound(380, 750); }
-
-    function goTo(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen-' + id).classList.add('active');
-        if (id === 'modes') { 
-            document.getElementById('main-title').innerText = "GYM SPACE PRO"; 
-            document.getElementById('sub-title').innerText = "Elige modalidad"; 
+    // --- MOTOR DE CONTROL POR VOZ (SEGURO Y TEMPORAL) ---
+    function toggleVoice() {
+        isVoiceEnabled = !isVoiceEnabled;
+        var btn = document.getElementById('toggle-voice');
+        var span = btn.querySelector('span');
+        
+        if (isVoiceEnabled) {
+            span.innerText = "CONTROL POR VOZ: ACTIVADO";
+            btn.classList.add('active');
+            initVoice();
+        } else {
+            span.innerText = "CONTROL POR VOZ: DESACTIVADO";
+            btn.classList.remove('active');
+            stopVoice();
         }
     }
 
-    function chooseMode(m) {
-        mode = m; document.getElementById('sub-title').innerText = m === 'time' ? "Ajustes de Tiempo" : "Ajustes de Repes";
-        var container = document.getElementById('selectors-render'); container.innerHTML = '';
-        var timeOpts = [10,15,20,30,45,60,75,90,120,180,240,300];
-        var repsOpts = [5,8,10,12,15,20,25,30,40,50];
-        if (mode === 'time') container.appendChild(createWheel('Tiempo Ejercicio', 'time', timeOpts.map(v => ({v, t: v + " sg"})), 45));
-        else container.appendChild(createWheel('Repeticiones', 'reps', repsOpts.map(v => ({v, t: v})), 10));
-        container.appendChild(createWheel('Descanso', 'rest', [5,10,15,20,25,30,45,60,90,120,180].map(v => ({v, t: v + " sg"})), 15));
-        container.appendChild(createWheel('Series Totales', 'series', [1,2,3,4,5,6,7,8,9,10].map(v => ({v, t: v})), 3));
+    function initVoice() {
+        if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            alert("Vaya, parece que tu navegador o móvil no soporta comandos de voz.");
+            isVoiceEnabled = false;
+            toggleVoice();
+            return;
+        }
+
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = true;
+        recognition.interimResults = false;
+
+        recognition.onresult = function(event) {
+            var command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+            console.log("Comando escuchado:", command);
+
+            // Filtramos comandos muy sencillos
+            if (command.includes('hecho') || command.includes('echo') || command.includes('ok') || command.includes('ya')) {
+                nextSegmentReps();
+            }
+            if (command.includes('parar') || command.includes('stop') || command.includes('pausa')) {
+                forceQuit();
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.warn("Reconocimiento de voz detenido o en pausa.");
+        };
+
+        // Si se detiene por inactividad del sistema, lo volvemos a levantar sólo si sigue encendido
+        recognition.onend = () => {
+            if (isVoiceEnabled && document.getElementById('screen-train').classList.contains('active')) {
+                try { recognition.start(); } catch(e) {}
+            }
+        };
+    }
+
+    function startVoiceListening() {
+        if (isVoiceEnabled && recognition) {
+            try {
+                recognition.start();
+                document.getElementById('voice-indicator').style.display = 'block';
+            } catch(e) {
+                console.log("Ya estaba escuchando.");
+            }
+        }
+    }
+
+    function stopVoice() {
+        if (recognition) {
+            try {
+                recognition.stop();
+            } catch(e) {}
+        }
+        document.getElementById('voice-indicator').style.display = 'none';
+    }
+
+    // --- FLUJO DE LA APLICACIÓN ---
+    function chooseMode(selected) {
+        mode = selected;
         goTo('setup');
+        renderSelectors();
     }
 
-    function createWheel(label, key, opts, def) {
-        var row = document.createElement('div'); row.className = 'picker-row';
-        row.innerHTML = `<div class="picker-label">${label}</div><div class="wheel-container"></div>`;
-        var cont = row.querySelector('.wheel-container');
-        cont.appendChild(document.createElement('div')).className = 'wheel-space';
-        opts.forEach((o, i) => {
-            var div = document.createElement('div'); div.className = 'wheel-item'; div.innerText = o.t; div.dataset.v = o.v;
-            cont.appendChild(div);
-        });
-        cont.appendChild(document.createElement('div')).className = 'wheel-space';
-        cont.onscroll = () => {
-            var center = cont.scrollTop + 60;
-            cont.querySelectorAll('.wheel-item').forEach(el => {
-                var dist = Math.abs(center - (el.offsetTop + 20));
-                if (dist < 30) { el.classList.add('selected'); settings[key] = parseInt(el.dataset.v); } else el.classList.remove('selected');
-            });
-        };
-        setTimeout(() => { 
-            var idx = opts.findIndex(o => o.v === def); 
-            cont.scrollTop = idx * 40; cont.onscroll(); 
-        }, 100);
-        return row;
-    }
-
-    function triggerRocketLaunch() {
-        requestWakeLock();
-        var overlay = document.getElementById('rocket-screen'), count = 5;
-        overlay.style.display = 'flex';
-        function run() {
-            if (count > 0) {
-                document.getElementById('rocket-text').innerText = count;
-                document.getElementById('rocket-text').className = 'rocket-number launch-animation';
-                sound(340, 150);
-                setTimeout(() => { document.getElementById('rocket-text').className = 'rocket-number'; count--; setTimeout(run, 50); }, 950);
-            } else {
-                document.getElementById('rocket-text').innerText = "¡GO!";
-                document.getElementById('rocket-text').className = 'rocket-number launch-animation';
-                playLongBeepWork();
-                setTimeout(() => { overlay.style.display = 'none'; startTrain(); }, 1000);
-            }
-        }
-        run();
-    }
-
-    function startTrain() {
-        goTo('train'); runtime.seriesLeft = settings.series;
-        document.getElementById('main-title').innerText = mode === 'time' ? "MODO TIEMPO" : "MODO REPETICIONES";
-        document.getElementById('sub-title').innerText = "En marcha";
-        document.getElementById('p-series').innerText = '1/' + settings.series;
-        if (mode === 'time') { document.getElementById('p-reps-box').style.display = 'none'; executeTime(); }
-        else { document.getElementById('p-reps-box').style.display = 'block'; document.getElementById('p-reps').innerText = settings.reps; document.getElementById('btn-done-reps').style.display = 'block'; executeReps(); }
-    }
-
-    function executeTime() {
-        if (runtime.interval) clearInterval(runtime.interval);
-        runtime.currentPhase = 'work'; runtime.seconds = settings.time;
-        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "¡DALE!";
-        updateTimer(runtime.seconds);
-        runtime.interval = setInterval(() => {
-            runtime.seconds--; updateTimer(runtime.seconds);
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(900, 120); }
-            if (runtime.seconds <= 0) { clearInterval(runtime.interval); playTripleBeepRest(); executeRest(); }
-        }, 1000);
-    }
-
-    function executeReps() {
-        if (runtime.interval) clearInterval(runtime.interval);
-        runtime.currentPhase = 'work';
-        document.getElementById('workout-badge').className = "badge work"; document.getElementById('workout-badge').innerText = "HAZ LAS REPETICIONES";
-        document.getElementById('workout-timer').innerText = "GO";
-    }
-
-    function nextSegmentReps() { if(runtime.currentPhase === 'work') { playTripleBeepRest(); document.getElementById('btn-done-reps').style.display = 'none'; executeRest(); } }
-
-    function executeRest() {
-        if (runtime.interval) clearInterval(runtime.interval);
-        runtime.currentPhase = 'rest'; runtime.seconds = settings.rest;
-        document.getElementById('workout-badge').className = "badge rest"; document.getElementById('workout-badge').innerText = "DESCANSO";
-        updateTimer(runtime.seconds);
-        runtime.interval = setInterval(() => {
-            runtime.seconds--; updateTimer(runtime.seconds);
-            if (runtime.seconds > 0 && runtime.seconds <= 5) { sound(340, 150); }
-            if (runtime.seconds <= 0) {
-                clearInterval(runtime.interval); runtime.seriesLeft--;
-                if (runtime.seriesLeft > 0) {
-                    playLongBeepWork();
-                    document.getElementById('p-series').innerText = (settings.series - runtime.seriesLeft + 1) + '/' + settings.series;
-                    if (mode === 'time') executeTime(); else { document.getElementById('btn-done-reps').style.display = 'block'; executeReps(); }
-                } else { sound(600, 1200); finishWorkout(); }
-            }
-        }, 1000);
-    }
-
-    function updateTimer(v) { 
-        var el = document.getElementById('workout-timer');
-        if (v >= 100) { el.classList.add('triple-digit'); el.innerText = v; } 
-        else { el.classList.remove('triple-digit'); el.innerText = v < 10 ? '0' + v : v; }
-    }
-    
-    function forceQuit() { clearInterval(runtime.interval); releaseWakeLock(); goTo('modes'); }
-
-    // Guardado automático e Historial
-    function finishWorkout() { 
-        clearInterval(runtime.interval); 
-        releaseWakeLock(); 
-        
-        // Guardar el entreno en LocalStorage antes de volver al menú
-        saveWorkoutToStats();
-        
-        goTo('modes'); 
-        setTimeout(() => { alert("🎯 ¡Entrenamiento completado y guardado en tu progreso!"); }, 150); 
-    }
-
-    function saveWorkoutToStats() {
-        var workouts = JSON.parse(localStorage.getItem('gym_space_workouts')) || [];
-        
-        // Calcular tiempo estimado en segundos
-        var durationSec = 0;
+    function renderSelectors() {
+        var container = document.getElementById('selectors-render');
         if (mode === 'time') {
-            durationSec = (settings.time * settings.series) + (settings.rest * (settings.series - 1));
+            container.innerHTML = `
+                <div class="setup-group">
+                    <div class="setup-label">Tiempo Trabajo <span id="val-time">${settings.time}s</span></div>
+                    <input type="range" class="slider-control" min="5" max="180" step="5" value="${settings.time}" oninput="updateVal('time', this.value)">
+                </div>
+                <div class="setup-group">
+                    <div class="setup-label">Tiempo Descanso <span id="val-rest">${settings.rest}s</span></div>
+                    <input type="range" class="slider-control" min="5" max="180" step="5" value="${settings.rest}" oninput="updateVal('rest', this.value)">
+                </div>
+                <div class="setup-group">
+                    <div class="setup-label">Series Totales <span id="val-series">${settings.series}</span></div>
+                    <input type="range" class="slider-control" min="1" max="12" step="1" value="${settings.series}" oninput="updateVal('series', this.value)">
+                </div>
+            `;
         } else {
-            // Estima de 4 segs por repetición de promedio + descansos reales
-            durationSec = ((settings.reps * 4) * settings.series) + (settings.rest * (settings.series - 1));
+            container.innerHTML = `
+                <div class="setup-group">
+                    <div class="setup-label">Repeticiones aprox. <span id="val-reps">${settings.reps}</span></div>
+                    <input type="range" class="slider-control" min="1" max="30" step="1" value="${settings.reps}" oninput="updateVal('reps', this.value)">
+                </div>
+                <div class="setup-group">
+                    <div class="setup-label">Tiempo Descanso <span id="val-rest">${settings.rest}s</span></div>
+                    <input type="range" class="slider-control" min="5" max="180" step="5" value="${settings.rest}" oninput="updateVal('rest', this.value)">
+                </div>
+                <div class="setup-group">
+                    <div class="setup-label">Series Totales <span id="val-series">${settings.series}</span></div>
+                    <input type="range" class="slider-control" min="1" max="12" step="1" value="${settings.series}" oninput="updateVal('series', this.value)">
+                </div>
+            `;
         }
-
-        var newRecord = {
-            date: new Date().toISOString(),
-            mode: mode,
-            series: settings.series,
-            value: mode === 'time' ? settings.time : settings.reps, // sg o reps
-            duration: Math.round(durationSec / 60) // en minutos
-        };
-
-        workouts.push(newRecord);
-        localStorage.setItem('gym_space_workouts', JSON.stringify(workouts));
     }
 
-    function goToStats() {
-        document.getElementById('main-title').innerText = "ESTADÍSTICAS"; 
-        document.getElementById('sub-title').innerText = "Progreso del entrenamiento";
-        goTo('stats');
-        renderStats();
+    function updateVal(key, val) {
+        settings[key] = parseInt(val);
+        document.getElementById('val-' + key).innerText = (key === 'series') ? val : val + 's';
     }
 
-    function renderStats() {
-        var workouts = JSON.parse(localStorage.getItem('gym_space_workouts')) || [];
-        var container = document.getElementById('history-items-container');
-        container.innerHTML = '';
+    function goTo(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + screenId).classList.add('active');
+    }
 
-        // 1. Calcular KPIs
-        var totalWorkouts = workouts.length;
-        var totalSeries = workouts.reduce((acc, curr) => acc + curr.series, 0);
-        var totalMinutes = workouts.reduce((acc, curr) => acc + curr.duration, 0);
-
-        document.getElementById('kpi-total-workouts').innerText = totalWorkouts;
-        document.getElementById('kpi-total-series').innerText = totalSeries;
-        document.getElementById('kpi-total-time').innerText = totalMinutes + 'm';
-
-        // 2. Renderizar Historial (últimos 10)
-        if (workouts.length === 0) {
-            container.innerHTML = '<div class="history-empty">Ningún entrenamiento completado aún. ¡Empieza hoy!</div>';
-        } else {
-            var reversed = [...workouts].reverse().slice(0, 10);
-            reversed.forEach(w => {
-                var d = new Date(w.date);
-                var formattedDate = d.getDate() + '/' + (d.getMonth() + 1) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-                var labelMode = w.mode === 'time' ? 'Tiempo' : 'Reps';
-                var unit = w.mode === 'time' ? 'sg' : ' r';
-                
-                var div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div>
-                        <div class="history-date">${formattedDate}</div>
-                        <strong style="color: ${w.mode === 'time' ? '#CCFF00' : '#0096ff'}">${w.mode.toUpperCase()}</strong>
-                    </div>
-                    <div class="history-details">
-                        ${w.series} x ${w.value}${unit}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // 3. Crear Gráfica de Progreso de Series (Últimos 7 entrenamientos)
-        var chartData = workouts.slice(-7);
-        var labels = chartData.map(w => {
-            var d = new Date(w.date);
-            return d.getDate() + '/' + (d.getMonth() + 1);
-        });
-        var seriesData = chartData.map(w => w.series);
-
-        if (statsChart) {
-            statsChart.destroy(); // Destruir gráfica anterior para evitar bugs de pintado
-        }
-
-        var ctx = document.getElementById('myStatsChart').getContext('2d');
+    // --- TEMPORIZADOR Y CONTROL DE ENTRENAMIENTO ---
+    function triggerRocketLaunch() {
+        goTo('train');
+        runtime.currentSeries = 1;
+        runtime.currentPhase = 'work';
         
-        // Configuración visual de la gráfica adaptada al modo oscuro de la app
-        statsChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels.length > 0 ? labels : ['Sin Datos'],
-                datasets: [{
-                    label: 'Series por sesión',
-                    data: seriesData.length > 0 ? seriesData : [0],
-                    backgroundColor: '#CCFF00',
-                    borderColor: '#CCFF00',
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    barThickness: 16
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#222' },
-                        ticks: { color: '#888', font: { family: 'Inter', size: 10 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#888', font: { family: 'Inter', size: 10 } }
-                    }
+        // Solicitar bloqueo de pantalla para evitar que se apague el móvil
+        if ('keepWakeLock' in navigator || 'wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(() => {});
+        }
+
+        // Si la voz está encendida en el interruptor principal, empezamos a escuchar ahora
+        if (isVoiceEnabled) {
+            startVoiceListening();
+        }
+
+        if (mode === 'time') {
+            document.getElementById('main-train-btn').style.display = 'none'; // El modo tiempo corre solo
+            runTimer(settings.time);
+        } else {
+            document.getElementById('main-train-btn').style.display = 'block'; // Mostrar el botón "Hecho"
+            document.getElementById('main-train-btn').innerText = '¡HECHO!';
+            document.getElementById('workout-timer').innerText = 'GO';
+            document.getElementById('workout-badge').innerText = 'TRABAJO';
+            document.getElementById('workout-badge').className = 'badge work';
+            document.getElementById('series-counter').innerHTML = `SERIE <span>${runtime.currentSeries} de ${settings.series}</span>`;
+            playBeep('start');
+        }
+    }
+
+    function runTimer(seconds) {
+        runtime.secondsLeft = seconds;
+        updateTimerDisplay();
+        
+        // Pequeño retardo para encajar el primer pitido
+        playBeep('start');
+
+        clearInterval(runtime.interval);
+        runtime.interval = setInterval(() => {
+            runtime.secondsLeft--;
+            updateTimerDisplay();
+
+            if (runtime.secondsLeft <= 3 && runtime.secondsLeft > 0) {
+                playBeep('tick');
+            }
+
+            if (runtime.secondsLeft <= 0) {
+                clearInterval(runtime.interval);
+                if (runtime.currentPhase === 'work') {
+                    executeRest();
+                } else {
+                    executeWork();
                 }
             }
-        });
+        }, 1000);
     }
 
-    function clearHistory() {
-        if (confirm("¿Estás seguro de que deseas borrar todo tu historial de entrenamientos?")) {
-            localStorage.removeItem('gym_space_workouts');
-            renderStats();
+    function updateTimerDisplay() {
+        var m = Math.floor(runtime.secondsLeft / 60);
+        var s = runtime.secondsLeft % 60;
+        document.getElementById('workout-timer').innerText = 
+            (m > 0 ? m + ':' : '') + (s < 10 ? '0' : '') + s;
+    }
+
+    function executeRest() {
+        playBeep('end');
+        runtime.currentPhase = 'rest';
+        document.getElementById('workout-badge').innerText = 'DESCANSO';
+        document.getElementById('workout-badge').className = 'badge rest';
+        document.getElementById('main-train-btn').style.display = 'none'; // No se puede pulsar "Hecho" en descanso
+        runTimer(settings.rest);
+    }
+
+    function executeWork() {
+        runtime.currentSeries++;
+        if (runtime.currentSeries > settings.series) {
+            endWorkout();
+            return;
         }
+
+        runtime.currentPhase = 'work';
+        document.getElementById('workout-badge').innerText = 'TRABAJO';
+        document.getElementById('workout-badge').className = 'badge work';
+        document.getElementById('series-counter').innerHTML = `SERIE <span>${runtime.currentSeries} de ${settings.series}</span>`;
+
+        if (mode === 'time') {
+            runTimer(settings.time);
+        } else {
+            document.getElementById('main-train-btn').style.display = 'block';
+            document.getElementById('workout-timer').innerText = 'GO';
+            playBeep('start');
+        }
+    }
+
+    // Usado en modo repeticiones (manual o por voz)
+    function nextSegmentReps() {
+        if (runtime.currentPhase === 'work') {
+            executeRest();
+        }
+    }
+
+    function endWorkout() {
+        clearInterval(runtime.interval);
+        playBeep('start');
+        stopVoice();
+
+        // Guardamos los datos de la sesión localmente
+        var transaction = db.transaction(["workouts"], "readwrite");
+        var store = transaction.objectStore("workouts");
+        var totalMinutes = (mode === 'time') 
+            ? ((settings.time + settings.rest) * settings.series) / 60
+            : (settings.rest * settings.series) / 60; // aprox.
+
+        store.add({
+            date: new Date().toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }),
+            series: settings.series,
+            mode: mode
+        });
+
+        transaction.oncomplete = function() {
+            renderHistoryChart();
+        };
+
+        alert("¡ENTRENAMIENTO COMPLETADO! ¡Menudo titán!");
+        goTo('modes');
+    }
+
+    function forceQuit() {
+        clearInterval(runtime.interval);
+        stopVoice();
+        goTo('modes');
+    }
+
+    // --- RENDERIZADO DEL GRÁFICO (CON CHART.JS DESDE LOCAL) ---
+    var historyChart = null;
+    function renderHistoryChart() {
+        if (!db) return;
+        var transaction = db.transaction(["workouts"], "readonly");
+        var store = transaction.objectStore("workouts");
+        var request = store.getAll();
+
+        request.onsuccess = function() {
+            var data = request.result;
+            // Nos quedamos solo con los últimos 5 entrenos para que quepa bien en el móvil
+            var lastFive = data.slice(-5);
+
+            var labels = lastFive.map(w => w.date);
+            var seriesData = lastFive.map(w => w.series);
+
+            if (historyChart) historyChart.destroy();
+
+            var ctx = document.getElementById('history-chart').getContext('2d');
+            historyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length ? labels : ['Sin datos'],
+                    datasets: [{
+                        label: 'Series Completadas',
+                        data: seriesData.length ? seriesData : [0],
+                        backgroundColor: '#CCFF00',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#222' }, ticks: { color: '#888' } },
+                        x: { grid: { display: false }, ticks: { color: '#888' } }
+                    }
+                }
+            });
+        };
     }
 </script>
 </body>
